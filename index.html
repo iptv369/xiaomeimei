@@ -1,787 +1,812 @@
+
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>抖音风格视频播放器</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#165DFF',
-                        secondary: '#6B7280',
-                        dark: '#1F2937',
-                        light: '#F3F4F6',
-                        accent: '#3B82F6'
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'system-ui', 'sans-serif'],
-                    },
-                }
-            }
+    <link rel="icon" href="https://tx.2cnm.cn/tp/wywl.png">
+    <title>千寻百念工作室</title>
+    <style>
+        :root {
+            --primary-color: #ff6b6b;
+            --secondary-color: #4ecdc4;
         }
-    </script>
-    <style type="text/tailwindcss">
-        @layer utilities {
-            .content-auto {
-                content-visibility: auto;
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+            touch-action: pan-y;
+        }
+
+        .app-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+        }
+        
+        .gender-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 45px;
+            height: 45px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .gender-toggle:hover {
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.3);
+        }
+        
+        /* 分类选择器 */
+        .category-selector {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 10;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .category-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid transparent;
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .category-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 0 2px rgba(255, 107, 107, 0.3);
+        }
+        
+        .category-btn.active {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+            color: #fff;
+        }
+        
+        .category-dropdown {
+            position: relative;
+        }
+        
+        .dropdown-toggle {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid transparent;
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .dropdown-toggle:hover {
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 0 2px rgba(255, 107, 107, 0.3);
+        }
+        
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            margin-top: 5px;
+            background: rgba(30, 30, 30, 0.95);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            padding: 8px;
+            min-width: 120px;
+            display: none;
+            flex-direction: column;
+            gap: 4px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .dropdown-menu.show {
+            display: flex;
+        }
+        
+        .dropdown-item {
+            padding: 10px 12px;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            background: transparent;
+            border: none;
+            text-align: left;
+            white-space: nowrap;
+        }
+        
+        .dropdown-item:hover {
+            background: rgba(255, 107, 107, 0.2);
+        }
+        
+        .dropdown-item.active {
+            background: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .icon-img {
+            width: 24px;
+            height: 24px;
+            object-fit: contain;
+        }
+
+        .video-wrapper {
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            background: #000;
+            margin-top: 30px;
+            aspect-ratio: 9/16;
+            touch-action: pan-y;
+        }
+
+        #video-element {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 20px;
+            cursor: default;
+        }
+
+        .decorative-border {
+            position: absolute;
+            top: -15px;
+            left: -15px;
+            right: -15px;
+            bottom: -15px;
+            border: 3px solid var(--primary-color);
+            border-radius: 30px;
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        .floating-controls {
+            position: absolute;
+            bottom: 30px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .control-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .control-btn:hover {
+            transform: scale(1.1);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .like-btn.active .icon-img {
+            filter: brightness(0) saturate(100%) invert(58%) sepia(85%) saturate(4921%) hue-rotate(325deg) brightness(101%) contrast(101%);
+            animation: pulse 0.5s;
+        }
+
+        .loading-spinner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 40px;
+            color: var(--primary-color);
+            display: none;
+        }
+
+        .spinner {
+            animation: fa-spin 2s infinite linear;
+        }
+
+        @keyframes fa-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            0% { opacity: 0.8; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 0.5; transform: translate(-50%, -120%) scale(1.5); }
+            100% { opacity: 0; transform: translate(-50%, -150%) scale(2); }
+        }
+
+        .floating-text {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--secondary-color);
+            font-weight: bold;
+            animation: float 2s infinite;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: popIn 0.3s ease-out;
+            z-index: 100;
+        }
+
+        .qq-icon {
+            width: 24px;
+            height: 24px;
+            background-image: url('https://tx.2cnm.cn/tp/qq.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+        }
+
+        .heart-effect {
+            position: absolute;
+            font-size: 60px;
+            color: var(--primary-color);
+            opacity: 0.8;
+            pointer-events: none;
+            animation: fadeOut 1s forwards;
+        }
+
+        @media (max-width: 480px) {
+            .app-container {
+                padding: 10px;
             }
-            .video-card-hover {
-                @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
+            .video-wrapper {
+                margin-top: 70px;
             }
-            .btn-primary {
-                @apply bg-primary text-white px-4 py-2 rounded-md hover:bg-primary/90 transition-all;
+            .gender-toggle {
+                top: 15px;
+                right: 15px;
+                width: 40px;
+                height: 40px;
             }
-            .btn-secondary {
-                @apply bg-light text-dark px-4 py-2 rounded-md hover:bg-light/80 transition-all;
+            .category-selector {
+                top: 15px;
+                left: 15px;
+                flex-wrap: wrap;
+                max-width: calc(100% - 80px);
             }
-            .touch-friendly {
-                @apply touch-manipulation;
-            }
-            .scroll-smooth {
-                scroll-behavior: smooth;
-            }
-            .vertical-btn-group {
-                @apply flex flex-col items-center space-y-3 fixed right-4 top-1/2 transform -translate-y-1/2 z-30;
+            .category-btn,
+            .dropdown-toggle {
+                padding: 6px 10px;
+                font-size: 12px;
             }
             .control-btn {
-                @apply w-12 h-12 rounded-full bg-black/50 backdrop-blur-sm text-white flex items-center justify-center text-xl hover:bg-black/70 transition-all;
+                width: 40px;
+                height: 40px;
             }
-        }
-
-        /* 自定义滚动条 */
-        ::-webkit-scrollbar {
-            width: 4px;
-            height: 4px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #c1c1c1;
-            border-radius: 2px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #a1a1a1;
-        }
-
-        /* 视频控制栏样式 */
-        .video-controls {
-            @apply absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3 transition-opacity duration-300 opacity-0 hover:opacity-100;
-        }
-
-        /* 抖音风格进度条 */
-        .progress-container {
-            @apply absolute bottom-0 left-0 right-0 h-1 bg-black/30 cursor-pointer;
-        }
-        .progress-bar {
-            @apply h-full bg-red-500 transition-all;
         }
     </style>
 </head>
-<body class="bg-gray-50 font-sans text-dark touch-friendly">
-    <!-- 顶部导航栏 -->
-    <header class="bg-white shadow-md fixed top-0 left-0 right-0 z-50">
-        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-            <div class="flex items-center space-x-2">
-                <i class="fa fa-play-circle text-primary text-2xl"></i>
-                <h1 class="text-lg font-bold text-primary">视频播放系统</h1>
-            </div>
-            <div class="flex items-center space-x-3">
-                <button id="search-btn" class="p-2 rounded-full hover:bg-gray-100">
-                    <i class="fa fa-search text-lg"></i>
+<body>
+    <div class="app-container">
+        <!-- 分类选择器 -->
+        <div class="category-selector">
+            <button class="category-btn active" data-category="jk">🎀 JK</button>
+            <button class="category-btn" data-category="rewu">💃 热舞</button>
+            <button class="category-btn" data-category="chuanda">👗 穿搭</button>
+            <button class="category-btn" data-category="qingchun">🌸 清纯</button>
+            <div class="category-dropdown">
+                <button class="dropdown-toggle" id="dropdownToggle">
+                    📂 更多 ▼
                 </button>
-                <button id="filter-btn" class="p-2 rounded-full hover:bg-gray-100">
-                    <i class="fa fa-filter text-lg"></i>
-                </button>
+                <div class="dropdown-menu" id="dropdownMenu">
+                    <button class="dropdown-item" data-category="nvda">🎓 女大</button>
+                    <button class="dropdown-item" data-category="shejie">👑 御姐</button>
+                    <button class="dropdown-item" data-category="gaozhiliang">⭐ 高质量</button>
+                    <button class="dropdown-item" data-category="heisi">🖤 黑丝</button>
+                    <button class="dropdown-item" data-category="baisi">🤍 白丝</button>
+                </div>
             </div>
         </div>
-        <!-- 搜索栏 -->
-        <div id="search-container" class="px-4 pb-3 hidden">
-            <div class="relative">
-                <input type="text" id="search-input" placeholder="搜索视频..." 
-                       class="w-full pl-10 pr-10 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary">
-                <i class="fa fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                <button id="clear-search" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
-                    <i class="fa fa-times-circle"></i>
-                </button>
+        
+        <div class="floating-text">每日推荐精彩视频</div>
+        <div class="video-wrapper" id="videoWrapper">
+            <div class="decorative-border"></div>
+            <video id="video-element" playsinline autoplay muted></video>
+            <div class="floating-controls">
+                <div class="control-group">
+                    <button class="control-btn like-btn" id="likeBtn">
+                        <img id="likeIcon" class="icon-img" alt="点赞">
+                    </button>
+                    <button class="control-btn" id="qqBtn">
+                        <div class="qq-icon"></div>
+                    </button>
+                </div>
+                <div class="control-group">
+                    <button class="control-btn sound-btn" id="soundBtn">
+                        <img id="soundIcon" class="icon-img" alt="声音">
+                    </button>
+                    <button class="control-btn" id="nextBtn">
+                        <img id="nextIcon" class="icon-img" alt="下一个">
+                    </button>
+                </div>
             </div>
         </div>
-    </header>
-
-    <!-- 筛选面板 -->
-    <div id="filter-panel" class="fixed inset-0 bg-black/50 z-40 hidden">
-        <div class="bg-white h-full w-3/4 max-w-sm right-0 overflow-y-auto">
-            <div class="p-4 border-b flex justify-between items-center">
-                <h2 class="text-lg font-bold">筛选条件</h2>
-                <button id="close-filter" class="p-2">
-                    <i class="fa fa-times text-xl"></i>
-                </button>
-            </div>
-            <div class="p-4">
-                <div class="mb-5">
-                    <label class="block text-sm font-medium mb-2">分类</label>
-                    <select id="category-filter" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary">
-                        <option value="all">所有分类</option>
-                    </select>
-                </div>
-                <div class="mb-5">
-                    <label class="block text-sm font-medium mb-2">地区</label>
-                    <select id="region-filter" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary">
-                        <option value="all">所有地区</option>
-                    </select>
-                </div>
-                <div class="mb-5">
-                    <label class="block text-sm font-medium mb-2">排序方式</label>
-                    <select id="sort-filter" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary">
-                        <option value="newest">最新创建</option>
-                        <option value="oldest">最早创建</option>
-                        <option value="longest">时长最长</option>
-                        <option value="shortest">时长最短</option>
-                    </select>
-                </div>
-                <button id="apply-filter" class="btn-primary w-full">应用筛选</button>
-            </div>
+        <div class="loading-spinner" id="loadingSpinner">
+            <img id="spinnerIcon" class="icon-img spinner" alt="加载中">
         </div>
     </div>
 
-    <!-- 主内容区 -->
-    <main class="container mx-auto px-3 pt-20 pb-16">
-        <!-- 视频播放器区域 -->
-        <section id="player-section" class="mb-6 bg-white rounded-xl shadow-md overflow-hidden relative">
-            <div class="aspect-video relative bg-black">
-                <!-- 视频播放器 -->
-                <video id="main-player" class="w-full h-full object-contain" 
-                       controls preload="metadata" poster="https://picsum.photos/1280/720" playsinline>
-                    <source id="video-source" src="" type="video/mp4">
-                    您的浏览器不支持HTML5视频播放，请更新浏览器版本。
-                </video>
-                
-                <!-- 抖音风格进度条 -->
-                <div class="progress-container" id="progress-container">
-                    <div class="progress-bar" id="progress-bar" style="width: 0%"></div>
-                </div>
-                
-                <!-- 加载中指示器 -->
-                <div id="loading-indicator" class="absolute inset-0 flex items-center justify-center hidden">
-                    <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-primary"></div>
-                </div>
-                
-                <!-- 视频中央播放按钮 -->
-                <div id="center-play-btn" class="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300">
-                    <button class="w-20 h-20 rounded-full bg-black/50 backdrop-blur-sm text-white flex items-center justify-center text-4xl hover:bg-black/70 transition-all">
-                        <i class="fa fa-play" id="center-play-icon"></i>
-                    </button>
-                </div>
-            </div>
-            
-            <!-- 右侧垂直控制按钮组 (抖音风格) -->
-            <div class="vertical-btn-group">
-                <button id="prev-btn" class="control-btn" title="上一个视频">
-                    <i class="fa fa-chevron-up"></i>
-                </button>
-                <button id="play-pause-btn" class="control-btn" title="播放/暂停">
-                    <i class="fa fa-pause" id="play-pause-icon"></i>
-                </button>
-                <button id="next-btn" class="control-btn" title="下一个视频">
-                    <i class="fa fa-chevron-down"></i>
-                </button>
-                <button id="auto-play-btn" class="control-btn" title="自动播放/取消自动播放">
-                    <i class="fa fa-refresh" id="auto-play-icon"></i>
-                </button>
-            </div>
-            
-            <!-- 视频信息 -->
-            <div class="p-4">
-                <h2 id="video-title" class="text-xl font-bold mb-2 line-clamp-1">请选择一个视频进行播放</h2>
-                <div class="flex flex-wrap gap-3 text-xs text-gray-600 mb-4">
-                    <div class="flex items-center">
-                        <i class="fa fa-clock-o mr-1"></i>
-                        <span id="video-duration">--:--</span>
-                    </div>
-                    <div class="flex items-center">
-                        <i class="fa fa-file-video-o mr-1"></i>
-                        <span id="video-size">未知大小</span>
-                    </div>
-                    <div class="flex items-center">
-                        <i class="fa fa-calendar mr-1"></i>
-                        <span id="video-time">未知时间</span>
-                    </div>
-                </div>
-                <!-- 视频质量切换 -->
-                <div class="flex items-center space-x-3">
-                    <div class="flex items-center bg-gray-100 rounded-lg px-2 py-1">
-                        <label class="mr-2 text-xs font-medium">画质:</label>
-                        <select id="quality-select" class="border-0 bg-transparent text-xs focus:outline-none">
-                            <option value="original">原始</option>
-                            <option value="hd" selected>高清</option>
-                        </select>
-                    </div>
-                    <button id="fullscreen-btn" class="flex items-center space-x-1 bg-gray-100 rounded-lg px-3 py-1">
-                        <i class="fa fa-expand"></i>
-                        <span class="text-xs">全屏</span>
-                    </button>
-                </div>
-            </div>
-        </section>
-
-        <!-- 视频列表标题 -->
-        <section class="mb-4 flex justify-between items-center">
-            <div class="flex items-center space-x-2">
-                <span class="text-lg font-medium">视频列表</span>
-                <span id="video-count" class="bg-primary/10 text-primary px-2 py-1 rounded-full text-xs">共 0 个</span>
-            </div>
-            <div class="flex space-x-2">
-                <button id="sort-btn" class="p-2 rounded-full bg-gray-100">
-                    <i class="fa fa-sort text-gray-600"></i>
-                </button>
-                <button id="view-mode-btn" class="p-2 rounded-full bg-gray-100">
-                    <i class="fa fa-th text-gray-600"></i>
-                </button>
-            </div>
-        </section>
-
-        <!-- 视频列表网格 -->
-        <section id="video-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            <!-- 视频卡片将通过JS动态生成 -->
-            <div class="col-span-full flex items-center justify-center py-12 text-gray-500">
-                <div class="text-center">
-                    <i class="fa fa-film text-4xl mb-4 opacity-50"></i>
-                    <p>正在加载视频列表...</p>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <!-- 底部导航 -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-white shadow-lg z-40">
-        <div class="grid grid-cols-4 py-2">
-            <a href="#" class="flex flex-col items-center justify-center text-primary">
-                <i class="fa fa-home text-xl"></i>
-                <span class="text-xs mt-1">首页</span>
-            </a>
-            <a href="#" class="flex flex-col items-center justify-center text-gray-500">
-                <i class="fa fa-compass text-xl"></i>
-                <span class="text-xs mt-1">发现</span>
-            </a>
-            <a href="#" class="flex flex-col items-center justify-center text-gray-500">
-                <i class="fa fa-bookmark-o text-xl"></i>
-                <span class="text-xs mt-1">收藏</span>
-            </a>
-            <a href="#" class="flex flex-col items-center justify-center text-gray-500">
-                <i class="fa fa-user-o text-xl"></i>
-                <span class="text-xs mt-1">我的</span>
-            </a>
-        </div>
-    </nav>
-
     <script>
-        // 全局变量
-        let videoData = []; // 从JSON文件加载
-        let currentVideoIndex = 0;
-        let isAutoPlay = true;
-        let filteredVideos = [];
+        // DOM元素引用
+        const videoElement = document.getElementById('video-element');
+        const videoWrapper = document.getElementById('videoWrapper');
+        const soundBtn = document.getElementById('soundBtn');
+        const soundIcon = document.getElementById('soundIcon');
+        const likeBtn = document.getElementById('likeBtn');
+        const likeIcon = document.getElementById('likeIcon');
+        const qqBtn = document.getElementById('qqBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const nextIcon = document.getElementById('nextIcon');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const spinnerIcon = document.getElementById('spinnerIcon');
+        // ... existing code ...
         
-        // DOM元素
-        const mainPlayer = document.getElementById('main-player');
-        const videoSource = document.getElementById('video-source');
-        const videoTitle = document.getElementById('video-title');
-        const videoDuration = document.getElementById('video-duration');
-        const videoSize = document.getElementById('video-size');
-        const videoTime = document.getElementById('video-time');
-        const qualitySelect = document.getElementById('quality-select');
-        const fullscreenBtn = document.getElementById('fullscreen-btn');
-        const videoGrid = document.getElementById('video-grid');
-        const videoCount = document.getElementById('video-count');
-        const searchBtn = document.getElementById('search-btn');
-        const searchContainer = document.getElementById('search-container');
-        const searchInput = document.getElementById('search-input');
-        const clearSearch = document.getElementById('clear-search');
-        const filterBtn = document.getElementById('filter-btn');
-        const filterPanel = document.getElementById('filter-panel');
-        const closeFilter = document.getElementById('close-filter');
-        const categoryFilter = document.getElementById('category-filter');
-        const regionFilter = document.getElementById('region-filter');
-        const sortFilter = document.getElementById('sort-filter');
-        const applyFilter = document.getElementById('apply-filter');
-        const loadingIndicator = document.getElementById('loading-indicator');
-        const sortBtn = document.getElementById('sort-btn');
-        const viewModeBtn = document.getElementById('view-mode-btn');
+        // 视频源配置
+        const apiBaseUrl = 'https://api.5k4.cn/api/sjxjj';
+        const videoSources = {
+            jk: apiBaseUrl + '?category=jk',
+            rewu: apiBaseUrl + '?category=rewu',
+            chuanda: apiBaseUrl + '?category=chuanda',
+            qingchun: apiBaseUrl + '?category=qingchun',
+            nvda: apiBaseUrl + '?category=nvda',
+            shejie: apiBaseUrl + '?category=shejie',
+            gaozhiliang: apiBaseUrl + '?category=gaozhiliang',
+            heisi: apiBaseUrl + '?category=heisi',
+            baisi: apiBaseUrl + '?category=baisi'
+        };
         
-        // 抖音风格控制按钮
-        const playPauseBtn = document.getElementById('play-pause-btn');
-        const playPauseIcon = document.getElementById('play-pause-icon');
-        const prevBtn = document.getElementById('prev-btn');
-        const nextBtn = document.getElementById('next-btn');
-        const autoPlayBtn = document.getElementById('auto-play-btn');
-        const autoPlayIcon = document.getElementById('auto-play-icon');
-        const centerPlayBtn = document.getElementById('center-play-btn');
-        const centerPlayIcon = document.getElementById('center-play-icon');
-        const progressContainer = document.getElementById('progress-container');
-        const progressBar = document.getElementById('progress-bar');
+        // 分类名称映射
+        const categoryNames = {
+            jk: 'JK制服',
+            rewu: '热舞',
+            chuanda: '穿搭',
+            qingchun: '清纯',
+            nvda: '女大',
+            shejie: '御姐',
+            gaozhiliang: '高质量',
+            heisi: '黑丝',
+            baisi: '白丝'
+        };
 
-        // 初始化分类和地区筛选器
-        function initFilters() {
-            // 清空现有选项（保留"所有"选项）
-            categoryFilter.innerHTML = '<option value="all">所有分类</option>';
-            regionFilter.innerHTML = '<option value="all">所有地区</option>';
-            
-            // 提取所有分类
-            const categories = [...new Set(videoData.map(video => video.category))];
-            // 提取所有地区
-            const regions = [...new Set(videoData.map(video => video.region))];
-            
-            // 填充分类筛选器
-            categories.forEach(category => {
-                const option = document.createElement('option');
-                option.value = category.toLowerCase().replace(/\s+/g, '-');
-                option.textContent = category;
-                categoryFilter.appendChild(option);
-            });
-            
-            // 填充地区筛选器
-            regions.forEach(region => {
-                const option = document.createElement('option');
-                option.value = region.toLowerCase().replace(/\s+/g, '-');
-                option.textContent = region;
-                regionFilter.appendChild(option);
-            });
-            
-            // 更新视频计数
-            videoCount.textContent = `共 ${videoData.length} 个`;
+        // 图标URL定义
+        const iconUrls = {
+            female: 'https://tx.2cnm.cn/tp/nusheng.png',
+            male: 'https://tx.2cnm.cn/tp/nansheng.png',
+            heart: 'https://tx.2cnm.cn/tp/mdz.png',
+            heartSolid: 'https://tx.2cnm.cn/tp/ydz.png',
+            soundOn: 'https://tx.2cnm.cn/tp/ys.png',
+            soundOff: 'https://tx.2cnm.cn/tp/jy.png',
+            next: 'https://tx.2cnm.cn/tp/xyg.png',
+            spinner: 'https://tx.2cnm.cn/tp/jzz.png',
+            qq: 'https://tx.2cnm.cn/tp/qq.png'
+        };
+
+        // 当前分类状态（默认为JK）
+        let currentCategory = 'jk';
+        // 保存静音状态
+        let isMuted = true;
+        // 初始显示加载动画
+        loadingSpinner.style.display = 'block';
+        
+        // 滑动手势相关变量
+        let startY = 0;
+        let currentY = 0;
+        let isSwiping = false;
+        const SWIPE_THRESHOLD = 40; // 滑动阈值改为40像素
+        
+        // 初始化图标
+        function initIcons() {
+            likeIcon.src = iconUrls.heart;
+            soundIcon.src = iconUrls.soundOff;
+            nextIcon.src = iconUrls.next;
+            spinnerIcon.src = iconUrls.spinner;
         }
+        
+        // 初始化图标
+        initIcons();
+        
+        // 初始化时加载第一个视频
+        loadVideo();
 
-        // 渲染视频列表
-        function renderVideoList(videosToRender = videoData) {
-            // 清空网格
-            videoGrid.innerHTML = '';
+
+
+        // 加载新视频
+        function loadVideo() {
+            console.log('loadVideo被调用, 当前分类:', currentCategory);
+            loadingSpinner.style.display = 'block';
             
-            if (videosToRender.length === 0) {
-                videoGrid.innerHTML = `
-                    <div class="col-span-full flex items-center justify-center py-12 text-gray-500">
-                        <div class="text-center">
-                            <i class="fa fa-search text-4xl mb-4 opacity-50"></i>
-                            <p>没有找到匹配的视频</p>
-                            <p class="text-sm mt-2">请尝试调整搜索条件或筛选器</p>
-                        </div>
-                    </div>
-                `;
+            // 从API获取视频URL
+            const apiUrl = videoSources[currentCategory];
+            console.log('API URL:', apiUrl);
+            
+            if (!apiUrl) {
+                console.error('未找到分类接口:', currentCategory);
+                loadingSpinner.style.display = 'none';
                 return;
             }
             
-            // 创建视频卡片
-            videosToRender.forEach((video, index) => {
-                const videoCard = document.createElement('div');
-                videoCard.className = `bg-white rounded-xl shadow-sm overflow-hidden video-card-hover cursor-pointer ${currentVideoIndex === index ? 'ring-2 ring-primary' : ''}`;
-                videoCard.dataset.videoId = video.id;
-                videoCard.dataset.index = index;
-                
-                // 处理视频标题（限制长度）
-                let displayTitle = video.title;
-                if (displayTitle.length > 18) {
-                    displayTitle = displayTitle.substring(0, 15) + '...';
-                }
-                
-                videoCard.innerHTML = `
-                    <div class="relative aspect-video bg-gray-100">
-                        <img src="${video.coverUrl}" alt="${video.title}" 
-                             class="w-full h-full object-cover transition-opacity duration-300 hover:opacity-90">
-                        <div class="absolute bottom-1 right-1 bg-black/70 text-white text-xs px-1 py-0.5 rounded">
-                            ${video.duration}
-                        </div>
-                        ${currentVideoIndex === index ? `
-                        <div class="absolute top-1 left-1 bg-primary text-white text-xs px-1 py-0.5 rounded">
-                            正在播放
-                        </div>
-                        ` : ''}
-                    </div>
-                    <div class="p-2">
-                        <h3 class="font-medium mb-1 line-clamp-1" title="${video.title}">${displayTitle}</h3>
-                        <div class="flex justify-between items-center text-xs text-gray-500">
-                            <span>${video.category}</span>
-                            <span>${video.createTime.split(' ')[0]}</span>
-                        </div>
-                    </div>
-                `;
-                
-                // 点击播放视频
-                videoCard.addEventListener('click', () => {
-                    currentVideoIndex = index;
-                    playVideo(filteredVideos[currentVideoIndex]);
-                    renderVideoList(filteredVideos);
+            const fetchUrl = apiUrl + '&t=' + Date.now();
+            console.log('开始请求:', fetchUrl);
+            
+            fetch(fetchUrl)
+                .then(response => {
+                    console.log('收到响应:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`HTTP 错误: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('响应数据:', data);
+                    if (data.code === 200 && data.data && data.data.videoUrl) {
+                        console.log('视频URL:', data.data.videoUrl);
+                        videoElement.src = data.data.videoUrl;
+                        videoElement.muted = isMuted;
+                        
+                        // 尝试播放视频
+                        videoElement.play().catch(e => {
+                            console.log('自动播放被阻止:', e);
+                        });
+                        
+                        // 重置点赞状态
+                        likeBtn.classList.remove('active');
+                        likeIcon.src = iconUrls.heart;
+                        
+                        // 更新声音图标
+                        updateSoundIcon();
+                    } else {
+                        console.error('视频获取失败:', data.msg || '未知错误', data);
+                        loadingSpinner.style.display = 'none';
+                        showErrorNotification('视频加载失败，请重试');
+                    }
+                })
+                .catch(error => {
+                    console.error('接口请求失败:', error);
+                    loadingSpinner.style.display = 'none';
+                    
+                    // 判断并改造错误信息
+                    let errorMsg = 'API 基地址无效，请检查配置';
+                    if (error.message.includes('CORS') || error.message.includes('Failed to fetch')) {
+                        errorMsg = 'API 接口无法访问，请检查网络或基地址';
+                    }
+                    showErrorNotification(errorMsg);
                 });
-                
-                videoGrid.appendChild(videoCard);
-            });
         }
 
-        // 播放视频
-        function playVideo(video) {
-            // 显示加载指示器
-            loadingIndicator.classList.remove('hidden');
-            playPauseIcon.className = 'fa fa-pause';
-            centerPlayIcon.className = 'fa fa-pause';
+        // 切换分类
+        function switchCategory(category) {
+            console.log('切换分类:', category, '当前分类:', currentCategory);
             
-            // 更新视频信息
-            videoTitle.textContent = video.title;
-            videoDuration.textContent = video.duration;
-            videoSize.textContent = video.fileSize;
-            videoTime.textContent = video.createTime.split(' ')[0];
+            if (category === currentCategory) {
+                console.log('已经是当前分类,不切换');
+                return;
+            }
             
-            // 设置视频源
-            const quality = qualitySelect.value;
-            const videoUrl = quality === 'original' ? video.originalUrl : video.hdUrl;
+            currentCategory = category;
+            console.log('新分类设置为:', currentCategory);
             
-            videoSource.src = videoUrl;
-            mainPlayer.poster = video.coverUrl;
-            
-            // 加载并播放视频
-            mainPlayer.load();
-            mainPlayer.play().catch(error => {
-                console.error('播放视频失败:', error);
-                alert('视频播放失败，请检查视频地址是否有效或尝试刷新页面。');
-                loadingIndicator.classList.add('hidden');
+            // 更新分类按钮状态
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelectorAll('.dropdown-item').forEach(item => {
+                item.classList.remove('active');
             });
             
-            // 视频加载完成后隐藏加载指示器
-            mainPlayer.addEventListener('loadeddata', () => {
-                loadingIndicator.classList.add('hidden');
-            }, { once: true });
+            const activeBtn = document.querySelector(`[data-category="${category}"]`);
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+                console.log('已激活按钮:', category);
+            }
             
-            // 视频播放错误处理
-            mainPlayer.addEventListener('error', () => {
-                loadingIndicator.classList.add('hidden');
-                alert('视频加载错误，请尝试切换视频质量或选择其他视频。');
-                console.error('视频错误代码:', mainPlayer.error.code);
-            }, { once: true });
+            // 加载新视频
+            console.log('开始加载视频...');
+            loadVideo();
             
-            // 滚动到播放器
-            document.getElementById('player-section').scrollIntoView({
-                behavior: 'smooth'
-            });
+            // 显示通知
+            showCategoryNotification(category);
+            
+            // 关闭下拉菜单
+            const dropdownMenu = document.getElementById('dropdownMenu');
+            if (dropdownMenu) {
+                dropdownMenu.classList.remove('show');
+            }
         }
+        
+        // 显示分类切换通知
+        function showCategoryNotification(category) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            
+            const text = document.createElement('span');
+            text.textContent = `已切换到【${categoryNames[category]}】分类`;
+            text.style.color = '#fff';
+            text.style.textShadow = '0 2px 4px rgba(0,0,0,0.5)';
+            
+            notification.appendChild(text);
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transition = 'opacity 0.5s';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 500);
+            }, 2000);
+        }
+        
+        // 显示错误通知
+        function showErrorNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.style.background = 'rgba(255, 107, 107, 0.8)';
+            
+            const text = document.createElement('span');
+            text.textContent = message;
+            text.style.color = '#fff';
+            text.style.textShadow = '0 2px 4px rgba(0,0,0,0.5)';
+            
+            notification.appendChild(text);
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transition = 'opacity 0.5s';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 500);
+            }, 3000);
+        }
+        
+        // 切换模式（男生视频）
+        // function toggleGenderMode() {
+        //     switchCategory('male');
+        // }
 
-        // 播放/暂停切换
-        function togglePlayPause() {
-            if (mainPlayer.paused) {
-                mainPlayer.play();
-                playPauseIcon.className = 'fa fa-pause';
-                centerPlayIcon.className = 'fa fa-pause';
+        // 视频结束自动播放下一个
+        videoElement.addEventListener('ended', function() {
+            loadVideo();
+        });
+
+        // 声音按钮点击事件
+        soundBtn.addEventListener('click', function() {
+            // 切换静音状态
+            isMuted = !isMuted;
+            videoElement.muted = isMuted;
+            
+            // 更新图标
+            updateSoundIcon();
+        });
+
+        // 更新声音图标状态
+        function updateSoundIcon() {
+            if (isMuted) {
+                soundIcon.src = iconUrls.soundOff;
             } else {
-                mainPlayer.pause();
-                playPauseIcon.className = 'fa fa-play';
-                centerPlayIcon.className = 'fa fa-play';
+                soundIcon.src = iconUrls.soundOn;
             }
         }
 
-        // 播放上一个视频
-        function playPreviousVideo() {
-            if (filteredVideos.length === 0) return;
-            
-            currentVideoIndex = (currentVideoIndex - 1 + filteredVideos.length) % filteredVideos.length;
-            playVideo(filteredVideos[currentVideoIndex]);
-            renderVideoList(filteredVideos);
-        }
+        // 初始化声音图标
+        updateSoundIcon();
 
-        // 播放下一个视频
-        function playNextVideo() {
-            if (filteredVideos.length === 0) return;
-            
-            currentVideoIndex = (currentVideoIndex + 1) % filteredVideos.length;
-            playVideo(filteredVideos[currentVideoIndex]);
-            renderVideoList(filteredVideos);
-        }
-
-        // 切换自动播放
-        function toggleAutoPlay() {
-            isAutoPlay = !isAutoPlay;
-            if (isAutoPlay) {
-                autoPlayIcon.className = 'fa fa-refresh text-green-400';
-                autoPlayBtn.classList.add('ring-2', 'ring-green-400');
+        // 点赞按钮点击事件
+        likeBtn.addEventListener('click', function() {
+            this.classList.toggle('active');
+            if (this.classList.contains('active')) {
+                likeIcon.src = iconUrls.heartSolid;
+                // 点赞动画效果
+                this.style.animation = 'pulse 0.5s';
+                setTimeout(() => {
+                    this.style.animation = '';
+                }, 500);
             } else {
-                autoPlayIcon.className = 'fa fa-refresh';
-                autoPlayBtn.classList.remove('ring-2', 'ring-green-400');
+                likeIcon.src = iconUrls.heart;
             }
-        }
+        });
 
-        // 更新进度条
-        function updateProgressBar() {
-            const progress = (mainPlayer.currentTime / mainPlayer.duration) * 100;
-            progressBar.style.width = `${progress}%`;
-        }
+        // QQ按钮点击事件
+        qqBtn.addEventListener('click', function() {
+            window.open('https://www.baidu.com');
+        });
 
-        // 点击进度条跳转
-        function seekToPosition(e) {
-            const rect = progressContainer.getBoundingClientRect();
-            const pos = (e.clientX - rect.left) / rect.width;
-            mainPlayer.currentTime = pos * mainPlayer.duration;
-        }
+        // 下一个视频按钮
+        nextBtn.addEventListener('click', function() {
+            console.log('点击了下一个视频按钮');
+            loadVideo();
+        });
 
-        // 筛选视频
-        function filterVideos() {
-            const searchTerm = searchInput.value.toLowerCase();
-            const category = categoryFilter.value;
-            const region = regionFilter.value;
-            const sortBy = sortFilter.value;
+        // 双击点赞功能
+        videoElement.addEventListener('dblclick', function(event) {
+            likeBtn.click();
+            // 添加视觉反馈
+            const effect = document.createElement('img');
+            effect.className = 'heart-effect';
+            effect.src = iconUrls.heartSolid;
+            effect.style.width = '60px';
+            effect.style.height = '60px';
+            effect.style.top = `${event.clientY}px`;
+            effect.style.left = `${event.clientX}px`;
             
-            // 筛选逻辑
-            filteredVideos = videoData.filter(video => {
-                // 搜索筛选
-                const matchesSearch = video.title.toLowerCase().includes(searchTerm) ||
-                                     video.category.toLowerCase().includes(searchTerm) ||
-                                     video.createTime.toLowerCase().includes(searchTerm);
-                
-                // 分类筛选
-                const matchesCategory = category === 'all' || 
-                                       video.category.toLowerCase().replace(/\s+/g, '-') === category;
-                
-                // 地区筛选
-                const matchesRegion = region === 'all' || 
-                                     video.region.toLowerCase().replace(/\s+/g, '-') === region;
-                
-                return matchesSearch && matchesCategory && matchesRegion;
+            document.body.appendChild(effect);
+            setTimeout(() => {
+                document.body.removeChild(effect);
+            }, 1000);
+        });
+
+        // 加载状态处理
+        videoElement.addEventListener('waiting', () => {
+            loadingSpinner.style.display = 'block';
+        });
+
+        videoElement.addEventListener('playing', () => {
+            loadingSpinner.style.display = 'none';
+        });
+
+        videoElement.addEventListener('loadeddata', () => {
+            loadingSpinner.style.display = 'none';
+        });
+        
+        videoElement.addEventListener('error', () => {
+            loadingSpinner.style.display = 'none';
+        });
+        
+        // ... existing code ...
+        
+        // 添加模式切换监听（已禁用）
+        // genderToggle.addEventListener('click', toggleGenderMode);
+        
+        // 分类按钮点击事件
+        document.querySelectorAll('.category-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                const category = this.getAttribute('data-category');
+                console.log('分类按钮被点击:', category);
+                switchCategory(category);
             });
-            
-            // 排序逻辑
-            filteredVideos.sort((a, b) => {
-                switch (sortBy) {
-                    case 'newest':
-                        return new Date(b.createTime) - new Date(a.createTime);
-                    case 'oldest':
-                        return new Date(a.createTime) - new Date(b.createTime);
-                    case 'longest':
-                        // 解析时长为秒数进行比较
-                        const getSeconds = (timeStr) => {
-                            const [min, sec] = timeStr.split(':').map(Number);
-                            return min * 60 + sec;
-                        };
-                        return getSeconds(b.duration) - getSeconds(a.duration);
-                    case 'shortest':
-                        const getSeconds2 = (timeStr) => {
-                            const [min, sec] = timeStr.split(':').map(Number);
-                            return min * 60 + sec;
-                        };
-                        return getSeconds2(a.duration) - getSeconds2(b.duration);
-                    default:
-                        return 0;
-                }
+        });
+        
+        // 下拉菜单项点击事件
+        document.querySelectorAll('.dropdown-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                const category = this.getAttribute('data-category');
+                console.log('下拉菜单项被点击:', category);
+                switchCategory(category);
             });
-            
-            // 更新当前视频索引
-            if (filteredVideos.length > 0) {
-                currentVideoIndex = 0;
-                playVideo(filteredVideos[currentVideoIndex]);
+        });
+        
+        // 下拉菜单切换
+        document.getElementById('dropdownToggle').addEventListener('click', function(e) {
+            e.stopPropagation();
+            document.getElementById('dropdownMenu').classList.toggle('show');
+        });
+        
+        // 点击其他地方关闭下拉菜单
+        document.addEventListener('click', function(e) {
+            const dropdown = document.getElementById('dropdownMenu');
+            const toggle = document.getElementById('dropdownToggle');
+            if (!dropdown.contains(e.target) && e.target !== toggle) {
+                dropdown.classList.remove('show');
             }
-            
-            // 渲染筛选后的列表
-            renderVideoList(filteredVideos);
-            // 更新计数
-            videoCount.textContent = `共 ${filteredVideos.length} 个`;
-        }
+        });
 
-        // 初始化事件监听
-        function initEventListeners() {
-            // 视频质量切换
-            qualitySelect.addEventListener('change', () => {
-                if (filteredVideos.length > 0) {
-                    playVideo(filteredVideos[currentVideoIndex]);
-                }
-            });
+        // ========== 向上滑动切换视频功能 ==========
+        
+        // 滑动手势处理
+        videoWrapper.addEventListener('touchstart', function(e) {
+            startY = e.touches[0].clientY;
+            isSwiping = true;
+        });
+        
+        videoWrapper.addEventListener('touchmove', function(e) {
+            if (!isSwiping) return;
+            currentY = e.touches[0].clientY;
             
-            // 全屏按钮
-            fullscreenBtn.addEventListener('click', () => {
-                if (mainPlayer.requestFullscreen) {
-                    mainPlayer.requestFullscreen();
-                } else if (mainPlayer.mozRequestFullScreen) {
-                    mainPlayer.mozRequestFullScreen();
-                } else if (mainPlayer.webkitRequestFullscreen) {
-                    mainPlayer.webkitRequestFullscreen();
-                } else if (mainPlayer.msRequestFullscreen) {
-                    mainPlayer.msRequestFullscreen();
-                }
-            });
+            // 计算滑动距离
+            const deltaY = startY - currentY;
             
-            // 搜索按钮
-            searchBtn.addEventListener('click', () => {
-                searchContainer.classList.toggle('hidden');
-                if (!searchContainer.classList.contains('hidden')) {
-                    searchInput.focus();
-                }
-            });
-            
-            // 清除搜索
-            clearSearch.addEventListener('click', () => {
-                searchInput.value = '';
-                filterVideos();
-            });
-            
-            // 搜索输入
-            searchInput.addEventListener('input', filterVideos);
-            
-            // 筛选按钮
-            filterBtn.addEventListener('click', () => {
-                filterPanel.classList.remove('hidden');
-            });
-            
-            // 关闭筛选面板
-            closeFilter.addEventListener('click', () => {
-                filterPanel.classList.add('hidden');
-            });
-            
-            // 点击筛选面板背景关闭
-            filterPanel.addEventListener('click', (e) => {
-                if (e.target === filterPanel) {
-                    filterPanel.classList.add('hidden');
-                }
-            });
-            
-            // 应用筛选
-            applyFilter.addEventListener('click', () => {
-                filterVideos();
-                filterPanel.classList.add('hidden');
-            });
-            
-            // 排序按钮
-            sortBtn.addEventListener('click', () => {
-                // 切换排序方式
-                const currentValue = sortFilter.value;
-                const values = ['newest', 'oldest', 'longest', 'shortest'];
-                const currentIndex = values.indexOf(currentValue);
-                const nextIndex = (currentIndex + 1) % values.length;
-                sortFilter.value = values[nextIndex];
-                
-                // 应用排序
-                filterVideos();
-                
-                // 显示排序提示
-                let sortText = '';
-                switch (sortFilter.value) {
-                    case 'newest': sortText = '最新创建'; break;
-                    case 'oldest': sortText = '最早创建'; break;
-                    case 'longest': sortText = '时长最长'; break;
-                    case 'shortest': sortText = '时长最短'; break;
-                }
-                alert(`已按${sortText}排序`);
-            });
-            
-            // 视图模式切换
-            let isGridMode = true;
-            viewModeBtn.addEventListener('click', () => {
-                if (isGridMode) {
-                    // 切换到列表模式
-                    videoGrid.classList.remove('grid-cols-2', 'sm:grid-cols-3');
-                    videoGrid.classList.add('grid-cols-1');
-                    viewModeBtn.innerHTML = '<i class="fa fa-th-list text-gray-600"></i>';
-                    isGridMode = false;
-                } else {
-                    // 切换到网格模式
-                    videoGrid.classList.remove('grid-cols-1');
-                    videoGrid.classList.add('grid-cols-2', 'sm:grid-cols-3');
-                    viewModeBtn.innerHTML = '<i class="fa fa-th text-gray-600"></i>';
-                    isGridMode = true;
-                }
-            });
-            
-            // 抖音风格控制按钮事件
-            playPauseBtn.addEventListener('click', togglePlayPause);
-            prevBtn.addEventListener('click', playPreviousVideo);
-            nextBtn.addEventListener('click', playNextVideo);
-            autoPlayBtn.addEventListener('click', toggleAutoPlay);
-            
-            // 视频播放状态变化
-            mainPlayer.addEventListener('play', () => {
-                playPauseIcon.className = 'fa fa-pause';
-                centerPlayIcon.className = 'fa fa-pause';
-            });
-            
-            mainPlayer.addEventListener('pause', () => {
-                playPauseIcon.className = 'fa fa-play';
-                centerPlayIcon.className = 'fa fa-play';
-            });
-            
-            // 视频播放结束
-            mainPlayer.addEventListener('ended', () => {
-                if (isAutoPlay) {
-                    playNextVideo();
-                } else {
-                    mainPlayer.currentTime = 0;
-                    playPauseIcon.className = 'fa fa-play';
-                    centerPlayIcon.className = 'fa fa-play';
-                }
-            });
-            
-            // 进度条更新
-            mainPlayer.addEventListener('timeupdate', updateProgressBar);
-            
-            // 点击进度条跳转
-            progressContainer.addEventListener('click', seekToPosition);
-            
-            // 视频加载完成
-            mainPlayer.addEventListener('loadedmetadata', () => {
-                updateProgressBar();
-            });
-            
-            // 中央播放按钮
-            centerPlayBtn.addEventListener('click', togglePlayPause);
-            
-            // 视频点击事件（模仿抖音）
-            mainPlayer.addEventListener('click', (e) => {
-                // 检查是否点击在进度条上
-                if (!progressContainer.contains(e.target)) {
-                    togglePlayPause();
-                }
-            });
-            
-            // 点击页面其他地方关闭搜索
-            document.addEventListener('click', (e) => {
-                if (!searchContainer.contains(e.target) && 
-                    !searchBtn.contains(e.target) &&
-                    !searchInput.contains(e.target)) {
-                    searchContainer.classList.add('hidden');
-                }
-            });
-        }
-
-        // 页面加载完成后初始化
-        document.addEventListener('DOMContentLoaded', async () => {
-            try {
-                // 发送请求读取根目录的video-data.json
-                const response = await fetch('/video-data.json');
-                if (!response.ok) throw new Error('文件读取失败');
-                videoData = await response.json(); // 解析JSON为数组
-                
-                // 后续初始化逻辑
-                initFilters();
-                filterVideos();
-                initEventListeners();
-                
-                // 初始化自动播放状态
-                autoPlayIcon.className = 'fa fa-refresh text-green-400';
-                autoPlayBtn.classList.add('ring-2', 'ring-green-400');
-                
-                // 加载第一个视频
-                if (filteredVideos.length > 0) {
-                    setTimeout(() => {
-                        playVideo(filteredVideos[currentVideoIndex]);
-                        renderVideoList(filteredVideos);
-                    }, 500);
-                }
-            } catch (error) {
-                console.error('视频数据加载失败：', error);
-                // 显示错误信息
-                videoGrid.innerHTML = `
-                    <div class="col-span-full flex items-center justify-center py-12 text-red-500">
-                        <div class="text-center">
-                            <i class="fa fa-exclamation-circle text-4xl mb-4"></i>
-                            <p>视频列表加载失败</p>
-                            <p class="text-sm mt-2">请检查 video-data.json 文件是否存在且格式正确</p>
-                        </div>
-                    </div>
-                `;
+            // 如果是向上滑动且距离超过40像素阈值
+            if (deltaY > SWIPE_THRESHOLD) {
+                // 触发切换视频
+                loadVideo();
+                isSwiping = false;
             }
+        });
+        
+        videoWrapper.addEventListener('touchend', function() {
+            isSwiping = false;
         });
     </script>
 </body>
