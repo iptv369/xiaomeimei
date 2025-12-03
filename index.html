@@ -48,7 +48,7 @@
             position: relative;
         }
         
-        /* 顶部工具栏 - 重新布局 */
+        /* 顶部工具栏 */
         .top-toolbar {
             position: absolute;
             top: 20px;
@@ -71,7 +71,7 @@
             align-items: center;
             gap: 5px;
             flex: 1;
-            max-width: calc(100% - 140px);
+            max-width: calc(100% - 70px);
             overflow: hidden;
         }
         
@@ -119,21 +119,14 @@
             color: #fff;
         }
         
-        /* API切换按钮区域 */
-        .api-switch-area {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-left: 10px;
-        }
-        
         /* API切换按钮容器 */
         .api-switch-container {
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 6px;
-            position: relative;
+            margin-left: 10px;
+            flex-shrink: 0;
         }
 
         .api-switch-btn {
@@ -216,38 +209,6 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
         }
 
-        /* 下一个视频按钮 */
-        .next-video-btn {
-            width: 52px;
-            height: 52px;
-            background: rgba(255, 107, 107, 0.15);
-            border: 2px solid rgba(255, 107, 107, 0.3);
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-            box-shadow: 
-                0 4px 15px rgba(0, 0, 0, 0.2),
-                inset 0 1px 0 rgba(255, 255, 255, 0.1);
-        }
-
-        .next-video-btn:hover {
-            background: rgba(255, 107, 107, 0.25);
-            border-color: rgba(255, 107, 107, 0.5);
-            transform: translateY(-2px);
-            box-shadow: 
-                0 8px 25px rgba(255, 107, 107, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.15);
-        }
-
-        .next-video-btn .switch-icon {
-            font-size: 26px;
-            filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.3));
-        }
-
         @keyframes apiGlow {
             0% {
                 box-shadow: 
@@ -275,36 +236,64 @@
             object-fit: contain;
         }
 
-        /* 视频播放器容器 - 固定不动 */
+        /* 全屏视频播放器容器 */
         .video-player-container {
             position: relative;
             width: 100%;
             margin-top: 90px;
-            touch-action: none; /* 禁止所有触摸交互 */
+            touch-action: none;
             user-select: none;
             -webkit-user-drag: none;
+            height: calc(100vh - 110px);
+            min-height: 500px;
         }
 
         .video-wrapper {
             position: relative;
+            width: 100%;
+            height: 100%;
             border-radius: 20px;
             overflow: hidden;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             background: #000;
-            aspect-ratio: 9/16;
-            transform: translateZ(0); /* 硬件加速 */
+            transform: translateZ(0);
             will-change: transform;
             backface-visibility: hidden;
+        }
+
+        /* 全屏模式样式 */
+        .video-wrapper.fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            border-radius: 0;
+            z-index: 1000;
+            margin: 0;
+        }
+
+        .video-wrapper.fullscreen .decorative-border {
+            display: none;
+        }
+
+        .video-wrapper.fullscreen .player-controls {
+            bottom: 40px;
+            left: 30px;
+            right: 30px;
         }
 
         #video-element {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            border-radius: 20px;
             cursor: default;
             display: block;
-            pointer-events: none; /* 禁止视频元素的所有指针事件 */
+            pointer-events: none;
+        }
+
+        .video-wrapper.fullscreen #video-element {
+            border-radius: 0;
         }
 
         .decorative-border {
@@ -317,6 +306,11 @@
             border-radius: 30px;
             opacity: 0.3;
             pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .video-wrapper.fullscreen .decorative-border {
+            opacity: 0;
         }
 
         /* 播放器控制按钮 */
@@ -328,7 +322,8 @@
             display: flex;
             justify-content: space-between;
             align-items: flex-end;
-            pointer-events: auto; /* 允许控制按钮交互 */
+            pointer-events: auto;
+            transition: all 0.3s ease;
         }
 
         .control-group {
@@ -356,6 +351,44 @@
         .control-btn:hover {
             transform: scale(1.1);
             background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* 全屏按钮 */
+        .fullscreen-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 10;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .video-wrapper:hover .fullscreen-btn,
+        .fullscreen-btn.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .fullscreen-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        .fullscreen-icon {
+            font-size: 20px;
+            color: white;
         }
 
         .like-btn.active .icon-img {
@@ -519,10 +552,12 @@
             
             .video-player-container {
                 margin-top: 80px;
+                height: calc(100vh - 100px);
+                min-height: 400px;
             }
             
             .category-selector {
-                max-width: calc(100% - 130px);
+                max-width: calc(100% - 70px);
             }
             
             .category-btn {
@@ -530,14 +565,12 @@
                 font-size: 12px;
             }
             
-            .api-switch-btn,
-            .next-video-btn {
+            .api-switch-btn {
                 width: 46px;
                 height: 46px;
             }
             
-            .api-switch-btn .switch-icon,
-            .next-video-btn .switch-icon {
+            .api-switch-btn .switch-icon {
                 font-size: 22px;
             }
             
@@ -551,10 +584,48 @@
                 height: 40px;
             }
             
+            .fullscreen-btn {
+                width: 35px;
+                height: 35px;
+                top: 15px;
+                right: 15px;
+            }
+            
+            .fullscreen-icon {
+                font-size: 18px;
+            }
+            
             .swipe-hint {
                 bottom: 90px;
                 font-size: 12px;
                 padding: 6px 12px;
+            }
+            
+            .player-controls {
+                bottom: 20px;
+                left: 15px;
+                right: 15px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .category-btn {
+                padding: 6px 8px;
+                font-size: 11px;
+            }
+            
+            .api-switch-btn {
+                width: 42px;
+                height: 42px;
+            }
+            
+            .api-switch-btn .switch-icon {
+                font-size: 20px;
+            }
+            
+            .control-btn {
+                width: 36px;
+                height: 36px;
             }
         }
     </style>
@@ -578,20 +649,12 @@
                 </div>
             </div>
             
-            <!-- API切换和下一个按钮区域 -->
-            <div class="api-switch-area">
-                <!-- 美化后的API切换按钮 -->
-                <div class="api-switch-container">
-                    <div class="api-switch-btn" id="apiSwitchBtn" title="切换API接口">
-                        <div class="switch-icon">🔀</div>
-                    </div>
-                    <div class="api-switch-label" id="apiSwitchLabel">API</div>
+            <!-- API切换按钮 -->
+            <div class="api-switch-container">
+                <div class="api-switch-btn" id="apiSwitchBtn" title="切换API接口">
+                    <div class="switch-icon">🔀</div>
                 </div>
-                
-                <!-- 下一个视频按钮 -->
-                <div class="next-video-btn" id="nextVideoBtn" title="下一个视频">
-                    <div class="switch-icon">⏭️</div>
-                </div>
+                <div class="api-switch-label" id="apiSwitchLabel">API</div>
             </div>
         </div>
         
@@ -610,6 +673,11 @@
             </div>
             
             <div class="video-wrapper" id="videoWrapper">
+                <!-- 全屏按钮 -->
+                <button class="fullscreen-btn" id="fullscreenBtn" title="全屏播放">
+                    <div class="fullscreen-icon">⛶</div>
+                </button>
+                
                 <div class="decorative-border"></div>
                 <video id="video-element" playsinline muted></video>
                 
@@ -655,7 +723,7 @@
         const qqBtn = document.getElementById('qqBtn');
         const nextBtn = document.getElementById('nextBtn');
         const nextIcon = document.getElementById('nextIcon');
-        const nextVideoBtn = document.getElementById('nextVideoBtn');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
         const loadingSpinner = document.getElementById('loadingSpinner');
         const spinnerIcon = document.getElementById('spinnerIcon');
         const apiSwitchBtn = document.getElementById('apiSwitchBtn');
@@ -692,11 +760,9 @@
         let currentCategory = 'jk';
         let isMuted = true;
         let isCustomApi = false;
+        let isFullscreen = false;
         
         // 触摸相关变量
-        let startY = 0;
-        let currentY = 0;
-        let isDragging = false;
         let pullStartY = 0;
         let isPulling = false;
         const PULL_THRESHOLD = 80;
@@ -867,6 +933,79 @@
             }
         }
         
+        /* ========== 全屏功能 ========== */
+        function toggleFullscreen() {
+            if (!isFullscreen) {
+                // 进入全屏
+                videoWrapper.classList.add('fullscreen');
+                fullscreenBtn.classList.add('active');
+                fullscreenBtn.querySelector('.fullscreen-icon').textContent = '⛶';
+                isFullscreen = true;
+                
+                // 隐藏其他元素
+                document.querySelector('.floating-text').style.opacity = '0';
+                document.querySelector('.top-toolbar').style.opacity = '0';
+                document.querySelector('.top-toolbar').style.pointerEvents = 'none';
+                
+                // 强制视频元素全屏
+                if (videoElement.requestFullscreen) {
+                    videoElement.requestFullscreen();
+                } else if (videoElement.webkitRequestFullscreen) {
+                    videoElement.webkitRequestFullscreen();
+                } else if (videoElement.mozRequestFullScreen) {
+                    videoElement.mozRequestFullScreen();
+                } else if (videoElement.msRequestFullscreen) {
+                    videoElement.msRequestFullscreen();
+                }
+            } else {
+                // 退出全屏
+                videoWrapper.classList.remove('fullscreen');
+                fullscreenBtn.classList.remove('active');
+                fullscreenBtn.querySelector('.fullscreen-icon').textContent = '⛶';
+                isFullscreen = false;
+                
+                // 显示其他元素
+                document.querySelector('.floating-text').style.opacity = '1';
+                document.querySelector('.top-toolbar').style.opacity = '1';
+                document.querySelector('.top-toolbar').style.pointerEvents = 'auto';
+                
+                // 退出全屏
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.mozCancelFullScreen) {
+                    document.mozCancelFullScreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+            }
+        }
+        
+        // 监听全屏变化
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+        document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+        document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+        
+        function handleFullscreenChange() {
+            const isCurrentlyFullscreen = !!(document.fullscreenElement || 
+                                            document.webkitFullscreenElement || 
+                                            document.mozFullScreenElement || 
+                                            document.msFullscreenElement);
+            
+            if (!isCurrentlyFullscreen && isFullscreen) {
+                // 用户通过其他方式退出了全屏
+                videoWrapper.classList.remove('fullscreen');
+                fullscreenBtn.classList.remove('active');
+                isFullscreen = false;
+                
+                document.querySelector('.floating-text').style.opacity = '1';
+                document.querySelector('.top-toolbar').style.opacity = '1';
+                document.querySelector('.top-toolbar').style.pointerEvents = 'auto';
+            }
+        }
+        
         /* ========== 分类切换功能 ========== */
         function switchCategory(category) {
             if (isCustomApi) {
@@ -969,19 +1108,13 @@
             window.open('https://www.baidu.com');
         });
 
-        // 下一个视频按钮（底部）
+        // 下一个视频按钮
         nextBtn.addEventListener('click', function() {
             loadVideo();
         });
 
-        // 下一个视频按钮（顶部）
-        nextVideoBtn.addEventListener('click', function() {
-            this.style.animation = 'switchPulse 0.3s';
-            setTimeout(() => {
-                this.style.animation = '';
-            }, 300);
-            loadVideo();
-        });
+        // 全屏按钮
+        fullscreenBtn.addEventListener('click', toggleFullscreen);
 
         // 双击点赞
         videoElement.addEventListener('dblclick', function(event) {
@@ -1040,14 +1173,19 @@
                 e.preventDefault();
                 loadVideo();
             }
+            if (e.altKey && e.key === 'f') {
+                e.preventDefault();
+                toggleFullscreen();
+            }
+            if (e.key === 'Escape' && isFullscreen) {
+                toggleFullscreen();
+            }
         });
         
         // 初始化API按钮状态
         updateApiButtonState();
 
         /* ========== 改进的触摸交互 ========== */
-        
-        // 只允许在视频播放器特定区域进行下拉刷新
         const videoContainer = document.querySelector('.video-player-container');
         
         videoContainer.addEventListener('touchstart', function(e) {
@@ -1061,21 +1199,18 @@
         videoContainer.addEventListener('touchmove', function(e) {
             if (!isPulling) return;
             
-            currentY = e.touches[0].clientY;
+            const currentY = e.touches[0].clientY;
             const deltaY = currentY - pullStartY;
             
             if (deltaY > 0) {
                 e.preventDefault();
                 
-                // 限制最大下拉距离
                 const pullDistance = Math.min(deltaY, PULL_THRESHOLD * 1.5);
                 const progress = Math.min(pullDistance / PULL_THRESHOLD, 1);
                 
-                // 显示下拉刷新提示
                 pullToRefresh.style.opacity = progress * 0.8;
                 pullToRefresh.classList.toggle('active', progress > 0);
                 
-                // 轻微移动视频容器
                 videoContainer.style.transform = `translateY(${pullDistance * 0.3}px)`;
             }
         }, { passive: false });
@@ -1086,13 +1221,10 @@
             isPulling = false;
             const currentTransform = parseFloat(videoContainer.style.transform.replace('translateY(', '').replace('px)', '')) || 0;
             
-            // 动画回弹
             videoContainer.style.transition = 'transform 0.3s ease-out';
             videoContainer.style.transform = 'translateY(0px)';
             
-            // 检查是否达到阈值
             if (currentTransform > PULL_THRESHOLD * 0.3) {
-                // 触发刷新
                 setTimeout(() => {
                     loadVideo();
                     pullToRefresh.classList.remove('active');
@@ -1101,7 +1233,6 @@
                 pullToRefresh.classList.remove('active');
             }
             
-            // 重置过渡
             setTimeout(() => {
                 videoContainer.style.transition = '';
             }, 300);
@@ -1109,7 +1240,6 @@
         
         // 防止默认的滚动行为
         document.addEventListener('touchmove', function(e) {
-            // 如果在视频区域内且不是下拉刷新操作，阻止默认滚动
             if (e.target.closest('.video-player-container') && !isPulling) {
                 e.preventDefault();
             }
@@ -1130,7 +1260,7 @@
         });
         
         // 确保控制按钮可以正常交互
-        document.querySelectorAll('.control-btn, .player-controls').forEach(element => {
+        document.querySelectorAll('.control-btn, .player-controls, .fullscreen-btn').forEach(element => {
             element.addEventListener('touchstart', function(e) {
                 e.stopPropagation();
             });
@@ -1143,6 +1273,29 @@
                 e.stopPropagation();
             });
         });
+        
+        // 视频悬停显示全屏按钮
+        let hoverTimer;
+        videoWrapper.addEventListener('mouseenter', function() {
+            clearTimeout(hoverTimer);
+            fullscreenBtn.style.opacity = '1';
+            fullscreenBtn.style.pointerEvents = 'auto';
+        });
+        
+        videoWrapper.addEventListener('mouseleave', function() {
+            if (!isFullscreen) {
+                hoverTimer = setTimeout(() => {
+                    fullscreenBtn.style.opacity = '0';
+                    fullscreenBtn.style.pointerEvents = 'none';
+                }, 1000);
+            }
+        });
+        
+        // 触摸设备保持全屏按钮可见
+        if ('ontouchstart' in window) {
+            fullscreenBtn.style.opacity = '1';
+            fullscreenBtn.style.pointerEvents = 'auto';
+        }
     </script>
 </body>
 </html>
