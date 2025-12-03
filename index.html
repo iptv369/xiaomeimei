@@ -36,6 +36,9 @@
             min-height: 100vh;
             overflow-x: hidden;
             touch-action: pan-y;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
         }
 
         .app-container {
@@ -45,16 +48,92 @@
             position: relative;
         }
         
-        /* 美化自定义API切换按钮 */
-        .api-switch-container {
+        /* 顶部工具栏 - 重新布局 */
+        .top-toolbar {
             position: absolute;
             top: 20px;
+            left: 20px;
             right: 20px;
-            z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 20;
+        }
+        
+        /* 分类选择器 */
+        .category-selector {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex: 1;
+            max-width: calc(100% - 140px);
+            overflow: hidden;
+        }
+        
+        .category-scroll-container {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            flex: 1;
+            padding: 0 2px;
+        }
+        
+        .category-scroll-container::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .category-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid transparent;
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+        
+        .category-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 0 2px rgba(255, 107, 107, 0.3);
+        }
+        
+        .category-btn.active {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+            color: #fff;
+        }
+        
+        /* API切换按钮区域 */
+        .api-switch-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-left: 10px;
+        }
+        
+        /* API切换按钮容器 */
+        .api-switch-container {
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 6px;
+            position: relative;
         }
 
         .api-switch-btn {
@@ -115,51 +194,6 @@
             filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.5));
         }
 
-        /* 按钮发光效果 */
-        .api-switch-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: radial-gradient(circle at center, 
-                rgba(255, 255, 255, 0.1) 0%, 
-                transparent 70%);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            border-radius: 14px;
-        }
-
-        .api-switch-btn:hover::before {
-            opacity: 1;
-        }
-
-        /* 按钮内光晕效果 */
-        .api-switch-btn::after {
-            content: '';
-            position: absolute;
-            top: -10px;
-            left: -10px;
-            right: -10px;
-            bottom: -10px;
-            background: linear-gradient(45deg, 
-                transparent 30%, 
-                rgba(52, 152, 219, 0.1) 45%, 
-                rgba(52, 152, 219, 0.2) 50%, 
-                rgba(52, 152, 219, 0.1) 55%, 
-                transparent 70%);
-            opacity: 0;
-            transition: opacity 0.6s ease;
-            z-index: -1;
-            border-radius: 20px;
-        }
-
-        .api-switch-btn.active::after {
-            opacity: 1;
-            animation: rotateLight 4s linear infinite;
-        }
-
         .api-switch-label {
             font-size: 11px;
             font-weight: 700;
@@ -172,13 +206,46 @@
             background: rgba(0, 0, 0, 0.3);
             border-radius: 10px;
             backdrop-filter: blur(5px);
+            white-space: nowrap;
         }
 
         .api-switch-btn.active + .api-switch-label {
             color: #fff;
-            background: rgba(52, 152, 219, 0.3);
+            background: rgba(52, 152, 219, 0.4);
             text-shadow: 0 0 10px rgba(52, 152, 219, 0.7);
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 下一个视频按钮 */
+        .next-video-btn {
+            width: 52px;
+            height: 52px;
+            background: rgba(255, 107, 107, 0.15);
+            border: 2px solid rgba(255, 107, 107, 0.3);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            box-shadow: 
+                0 4px 15px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .next-video-btn:hover {
+            background: rgba(255, 107, 107, 0.25);
+            border-color: rgba(255, 107, 107, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 
+                0 8px 25px rgba(255, 107, 107, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        }
+
+        .next-video-btn .switch-icon {
+            font-size: 26px;
+            filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.3));
         }
 
         @keyframes apiGlow {
@@ -196,137 +263,10 @@
             }
         }
 
-        @keyframes rotateLight {
-            0% {
-                transform: rotate(0deg);
-            }
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
         @keyframes switchPulse {
             0% { transform: scale(1); }
             50% { transform: scale(1.15); }
             100% { transform: scale(1); }
-        }
-
-        @keyframes iconFlip {
-            0% { transform: rotateY(0deg); }
-            50% { transform: rotateY(180deg); }
-            100% { transform: rotateY(360deg); }
-        }
-        
-        /* 分类选择器 */
-        .category-selector {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            z-index: 10;
-            padding: 8px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        
-        .category-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid transparent;
-            color: #fff;
-            padding: 8px 12px;
-            border-radius: 12px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            white-space: nowrap;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        
-        .category-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-            box-shadow: 0 0 0 2px rgba(255, 107, 107, 0.3);
-        }
-        
-        .category-btn.active {
-            background: var(--primary-color);
-            border-color: var(--primary-color);
-            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
-            color: #fff;
-        }
-        
-        .category-dropdown {
-            position: relative;
-        }
-        
-        .dropdown-toggle {
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid transparent;
-            color: #fff;
-            padding: 8px 12px;
-            border-radius: 12px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        
-        .dropdown-toggle:hover {
-            background: rgba(255, 255, 255, 0.2);
-            box-shadow: 0 0 0 2px rgba(255, 107, 107, 0.3);
-        }
-        
-        .dropdown-menu {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            margin-top: 5px;
-            background: rgba(30, 30, 30, 0.95);
-            border-radius: 12px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-            padding: 8px;
-            min-width: 120px;
-            display: none;
-            flex-direction: column;
-            gap: 4px;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-        
-        .dropdown-menu.show {
-            display: flex;
-        }
-        
-        .dropdown-item {
-            padding: 10px 12px;
-            color: #fff;
-            cursor: pointer;
-            border-radius: 8px;
-            transition: all 0.2s ease;
-            font-size: 14px;
-            background: transparent;
-            border: none;
-            text-align: left;
-            white-space: nowrap;
-        }
-        
-        .dropdown-item:hover {
-            background: rgba(255, 107, 107, 0.2);
-        }
-        
-        .dropdown-item.active {
-            background: var(--primary-color);
-            font-weight: 600;
         }
 
         .icon-img {
@@ -335,15 +275,26 @@
             object-fit: contain;
         }
 
+        /* 视频播放器容器 - 固定不动 */
+        .video-player-container {
+            position: relative;
+            width: 100%;
+            margin-top: 90px;
+            touch-action: none; /* 禁止所有触摸交互 */
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+
         .video-wrapper {
             position: relative;
             border-radius: 20px;
             overflow: hidden;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             background: #000;
-            margin-top: 30px;
             aspect-ratio: 9/16;
-            touch-action: pan-y;
+            transform: translateZ(0); /* 硬件加速 */
+            will-change: transform;
+            backface-visibility: hidden;
         }
 
         #video-element {
@@ -352,6 +303,8 @@
             object-fit: cover;
             border-radius: 20px;
             cursor: default;
+            display: block;
+            pointer-events: none; /* 禁止视频元素的所有指针事件 */
         }
 
         .decorative-border {
@@ -366,7 +319,8 @@
             pointer-events: none;
         }
 
-        .floating-controls {
+        /* 播放器控制按钮 */
+        .player-controls {
             position: absolute;
             bottom: 30px;
             left: 20px;
@@ -374,6 +328,7 @@
             display: flex;
             justify-content: space-between;
             align-items: flex-end;
+            pointer-events: auto; /* 允许控制按钮交互 */
         }
 
         .control-group {
@@ -395,6 +350,7 @@
             align-items: center;
             justify-content: center;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            pointer-events: auto;
         }
 
         .control-btn:hover {
@@ -407,6 +363,7 @@
             animation: pulse 0.5s;
         }
 
+        /* 加载动画 */
         .loading-spinner {
             position: absolute;
             top: 50%;
@@ -415,6 +372,8 @@
             font-size: 40px;
             color: var(--primary-color);
             display: none;
+            z-index: 10;
+            pointer-events: none;
         }
 
         .spinner {
@@ -457,6 +416,7 @@
             color: var(--secondary-color);
             font-weight: bold;
             animation: float 2s infinite;
+            pointer-events: none;
         }
 
         .notification {
@@ -474,6 +434,7 @@
             gap: 10px;
             animation: popIn 0.3s ease-out;
             z-index: 100;
+            pointer-events: none;
         }
 
         .qq-icon {
@@ -491,103 +452,191 @@
             opacity: 0.8;
             pointer-events: none;
             animation: fadeOut 1s forwards;
+            z-index: 10;
+        }
+
+        /* 滑动提示 */
+        .swipe-hint {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+            font-weight: 500;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 8px 16px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            pointer-events: none;
+            z-index: 5;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: opacity 0.3s ease;
+        }
+
+        .swipe-hint.hidden {
+            opacity: 0;
+        }
+
+        /* 下拉刷新区域 */
+        .pull-to-refresh {
+            position: absolute;
+            top: -60px;
+            left: 0;
+            right: 0;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .pull-to-refresh.active {
+            opacity: 1;
+        }
+
+        .refresh-icon {
+            font-size: 24px;
+            color: var(--primary-color);
+            animation: fa-spin 1s infinite linear;
         }
 
         @media (max-width: 480px) {
             .app-container {
                 padding: 10px;
             }
-            .video-wrapper {
-                margin-top: 70px;
-            }
-            .api-switch-container {
+            
+            .top-toolbar {
                 top: 15px;
+                left: 15px;
                 right: 15px;
             }
-            .api-switch-btn {
+            
+            .video-player-container {
+                margin-top: 80px;
+            }
+            
+            .category-selector {
+                max-width: calc(100% - 130px);
+            }
+            
+            .category-btn {
+                padding: 6px 10px;
+                font-size: 12px;
+            }
+            
+            .api-switch-btn,
+            .next-video-btn {
                 width: 46px;
                 height: 46px;
             }
-            .api-switch-btn .switch-icon {
+            
+            .api-switch-btn .switch-icon,
+            .next-video-btn .switch-icon {
                 font-size: 22px;
             }
+            
             .api-switch-label {
                 font-size: 10px;
                 padding: 1px 6px;
             }
-            .category-selector {
-                top: 15px;
-                left: 15px;
-                flex-wrap: wrap;
-                max-width: calc(100% - 80px);
-            }
-            .category-btn,
-            .dropdown-toggle {
-                padding: 6px 10px;
-                font-size: 12px;
-            }
+            
             .control-btn {
                 width: 40px;
                 height: 40px;
+            }
+            
+            .swipe-hint {
+                bottom: 90px;
+                font-size: 12px;
+                padding: 6px 12px;
             }
         }
     </style>
 </head>
 <body>
     <div class="app-container">
-        <!-- 美化后的API切换按钮（使用🔀图标） -->
-        <div class="api-switch-container">
-            <div class="api-switch-btn" id="apiSwitchBtn" title="切换API接口">
-                <div class="switch-icon">🔀</div>
+        <!-- 顶部工具栏 -->
+        <div class="top-toolbar">
+            <!-- 分类选择器 -->
+            <div class="category-selector">
+                <div class="category-scroll-container" id="categoryScroll">
+                    <button class="category-btn active" data-category="jk">🎀 JK</button>
+                    <button class="category-btn" data-category="rewu">💃 热舞</button>
+                    <button class="category-btn" data-category="chuanda">👗 穿搭</button>
+                    <button class="category-btn" data-category="qingchun">🌸 清纯</button>
+                    <button class="category-btn" data-category="nvda">🎓 女大</button>
+                    <button class="category-btn" data-category="shejie">👑 御姐</button>
+                    <button class="category-btn" data-category="gaozhiliang">⭐ 高质量</button>
+                    <button class="category-btn" data-category="heisi">🖤 黑丝</button>
+                    <button class="category-btn" data-category="baisi">🤍 白丝</button>
+                </div>
             </div>
-            <div class="api-switch-label" id="apiSwitchLabel">API</div>
-        </div>
-        
-        <!-- 分类选择器 -->
-        <div class="category-selector">
-            <button class="category-btn active" data-category="jk">🎀 JK</button>
-            <button class="category-btn" data-category="rewu">💃 热舞</button>
-            <button class="category-btn" data-category="chuanda">👗 穿搭</button>
-            <button class="category-btn" data-category="qingchun">🌸 清纯</button>
-            <div class="category-dropdown">
-                <button class="dropdown-toggle" id="dropdownToggle">
-                    📂 更多 ▼
-                </button>
-                <div class="dropdown-menu" id="dropdownMenu">
-                    <button class="dropdown-item" data-category="nvda">🎓 女大</button>
-                    <button class="dropdown-item" data-category="shejie">👑 御姐</button>
-                    <button class="dropdown-item" data-category="gaozhiliang">⭐ 高质量</button>
-                    <button class="dropdown-item" data-category="heisi">🖤 黑丝</button>
-                    <button class="dropdown-item" data-category="baisi">🤍 白丝</button>
+            
+            <!-- API切换和下一个按钮区域 -->
+            <div class="api-switch-area">
+                <!-- 美化后的API切换按钮 -->
+                <div class="api-switch-container">
+                    <div class="api-switch-btn" id="apiSwitchBtn" title="切换API接口">
+                        <div class="switch-icon">🔀</div>
+                    </div>
+                    <div class="api-switch-label" id="apiSwitchLabel">API</div>
+                </div>
+                
+                <!-- 下一个视频按钮 -->
+                <div class="next-video-btn" id="nextVideoBtn" title="下一个视频">
+                    <div class="switch-icon">⏭️</div>
                 </div>
             </div>
         </div>
         
-        <div class="floating-text">每日推荐精彩视频</div>
-        <div class="video-wrapper" id="videoWrapper">
-            <div class="decorative-border"></div>
-            <video id="video-element" playsinline muted></video>
-            <div class="floating-controls">
-                <div class="control-group">
-                    <button class="control-btn like-btn" id="likeBtn">
-                        <img id="likeIcon" class="icon-img" alt="点赞">
-                    </button>
-                    <button class="control-btn" id="qqBtn">
-                        <div class="qq-icon"></div>
-                    </button>
-                </div>
-                <div class="control-group">
-                    <button class="control-btn sound-btn" id="soundBtn">
-                        <img id="soundIcon" class="icon-img" alt="声音">
-                    </button>
-                    <button class="control-btn" id="nextBtn">
-                        <img id="nextIcon" class="icon-img" alt="下一个">
-                    </button>
+        <!-- 视频播放器区域 -->
+        <div class="video-player-container">
+            <div class="floating-text">每日推荐精彩视频</div>
+            
+            <!-- 下拉刷新提示 -->
+            <div class="pull-to-refresh" id="pullToRefresh">
+                <div class="refresh-icon">↻</div>
+            </div>
+            
+            <!-- 滑动提示 -->
+            <div class="swipe-hint" id="swipeHint">
+                <span>下拉刷新视频</span>
+            </div>
+            
+            <div class="video-wrapper" id="videoWrapper">
+                <div class="decorative-border"></div>
+                <video id="video-element" playsinline muted></video>
+                
+                <!-- 播放器控制按钮 -->
+                <div class="player-controls">
+                    <div class="control-group">
+                        <button class="control-btn like-btn" id="likeBtn">
+                            <img id="likeIcon" class="icon-img" alt="点赞">
+                        </button>
+                        <button class="control-btn" id="qqBtn">
+                            <div class="qq-icon"></div>
+                        </button>
+                    </div>
+                    <div class="control-group">
+                        <button class="control-btn sound-btn" id="soundBtn">
+                            <img id="soundIcon" class="icon-img" alt="声音">
+                        </button>
+                        <button class="control-btn" id="nextBtn">
+                            <img id="nextIcon" class="icon-img" alt="下一个">
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="loading-spinner" id="loadingSpinner">
-            <img id="spinnerIcon" class="icon-img spinner" alt="加载中">
+            
+            <div class="loading-spinner" id="loadingSpinner">
+                <img id="spinnerIcon" class="icon-img spinner" alt="加载中">
+            </div>
         </div>
     </div>
 
@@ -606,10 +655,14 @@
         const qqBtn = document.getElementById('qqBtn');
         const nextBtn = document.getElementById('nextBtn');
         const nextIcon = document.getElementById('nextIcon');
+        const nextVideoBtn = document.getElementById('nextVideoBtn');
         const loadingSpinner = document.getElementById('loadingSpinner');
         const spinnerIcon = document.getElementById('spinnerIcon');
         const apiSwitchBtn = document.getElementById('apiSwitchBtn');
         const apiSwitchLabel = document.getElementById('apiSwitchLabel');
+        const categoryScroll = document.getElementById('categoryScroll');
+        const pullToRefresh = document.getElementById('pullToRefresh');
+        const swipeHint = document.getElementById('swipeHint');
         
         // 分类配置
         const categoryNames = {
@@ -640,11 +693,13 @@
         let isMuted = true;
         let isCustomApi = false;
         
-        // 滑动手势相关变量
+        // 触摸相关变量
         let startY = 0;
         let currentY = 0;
-        let isSwiping = false;
-        const SWIPE_THRESHOLD = 40;
+        let isDragging = false;
+        let pullStartY = 0;
+        let isPulling = false;
+        const PULL_THRESHOLD = 80;
         
         // 初始化图标
         function initIcons() {
@@ -654,13 +709,18 @@
             spinnerIcon.src = iconUrls.spinner;
         }
         
-        // 初始化图标
+        // 初始化
         initIcons();
         
         // 默认加载第一个视频
         loadDefaultVideo();
+        
+        // 隐藏滑动提示
+        setTimeout(() => {
+            swipeHint.classList.add('hidden');
+        }, 3000);
 
-        /* ========== 视频加载函数（默认API） ========== */
+        /* ========== 视频加载函数 ========== */
         function loadDefaultVideo() {
             console.log('加载默认API视频，分类:', currentCategory);
             loadingSpinner.style.display = 'block';
@@ -716,20 +776,15 @@
                 });
         }
 
-        /* ========== 视频加载函数（自定义API） ========== */
         function loadCustomVideo() {
             console.log('加载自定义API视频');
             loadingSpinner.style.display = 'block';
             
-            // 按照您提供的方法：直接设置video.src为API地址
-            // 必须静音，因为自定义API可能直接返回视频流
             videoElement.muted = true;
             videoElement.src = CUSTOM_API_URL + '?t=' + Date.now();
             
-            // 播放视频
             videoElement.play().then(() => {
                 console.log('自定义API视频开始播放');
-                // 3秒后打开声音（可选）
                 setTimeout(() => {
                     if (!isMuted) {
                         videoElement.muted = false;
@@ -742,15 +797,11 @@
                 showNotification('自定义接口播放失败', 'error');
             });
             
-            // 重置点赞状态
             likeBtn.classList.remove('active');
             likeIcon.src = iconUrls.heart;
-            
-            // 更新声音图标
             updateSoundIcon();
         }
 
-        /* ========== 通用视频加载函数 ========== */
         function loadVideo() {
             if (isCustomApi) {
                 loadCustomVideo();
@@ -759,12 +810,12 @@
             }
         }
         
-        /* ========== 切换API函数 ========== */
+        /* ========== API切换功能 ========== */
         function toggleApiMode() {
             // 添加点击动画效果
             apiSwitchBtn.style.animation = 'switchPulse 0.3s';
             const switchIcon = apiSwitchBtn.querySelector('.switch-icon');
-            switchIcon.style.animation = 'iconFlip 0.6s ease-out';
+            switchIcon.style.animation = 'switchPulse 0.6s ease-out';
             
             setTimeout(() => {
                 apiSwitchBtn.style.animation = '';
@@ -778,15 +829,11 @@
                 updateApiButtonState();
                 
                 // 启用分类选择器
-                document.querySelectorAll('.category-btn, .dropdown-toggle, .dropdown-item').forEach(btn => {
-                    btn.style.opacity = '1';
-                    btn.style.pointerEvents = 'auto';
-                });
+                categoryScroll.style.opacity = '1';
+                categoryScroll.style.pointerEvents = 'auto';
                 
-                // 显示通知
                 showNotification('已切换到默认接口', 'success');
                 
-                // 重新加载默认分类的视频
                 currentCategory = 'jk';
                 document.querySelectorAll('.category-btn').forEach(btn => {
                     btn.classList.remove('active');
@@ -800,20 +847,14 @@
                 updateApiButtonState();
                 
                 // 禁用分类选择器
-                document.querySelectorAll('.category-btn, .dropdown-toggle, .dropdown-item').forEach(btn => {
-                    btn.style.opacity = '0.5';
-                    btn.style.pointerEvents = 'none';
-                });
+                categoryScroll.style.opacity = '0.5';
+                categoryScroll.style.pointerEvents = 'none';
                 
-                // 显示通知
                 showNotification('已切换到自定义接口', 'success');
-                
-                // 使用自定义API加载视频
                 loadCustomVideo();
             }
         }
         
-        // 更新API按钮状态
         function updateApiButtonState() {
             if (isCustomApi) {
                 apiSwitchLabel.textContent = '自定义';
@@ -826,52 +867,37 @@
             }
         }
         
-        // 切换分类
+        /* ========== 分类切换功能 ========== */
         function switchCategory(category) {
             if (isCustomApi) {
                 showNotification('自定义接口不支持分类切换', 'error');
                 return;
             }
             
-            console.log('切换分类:', category, '当前分类:', currentCategory);
-            
-            if (category === currentCategory) {
-                console.log('已经是当前分类,不切换');
-                return;
-            }
+            if (category === currentCategory) return;
             
             currentCategory = category;
-            console.log('新分类设置为:', currentCategory);
             
-            // 更新分类按钮状态
             document.querySelectorAll('.category-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
-            document.querySelectorAll('.dropdown-item').forEach(item => {
-                item.classList.remove('active');
-            });
+            document.querySelector(`[data-category="${category}"]`).classList.add('active');
             
-            const activeBtn = document.querySelector(`[data-category="${category}"]`);
-            if (activeBtn) {
-                activeBtn.classList.add('active');
-                console.log('已激活按钮:', category);
-            }
-            
-            // 加载新视频
-            console.log('开始加载视频...');
             loadVideo();
-            
-            // 显示通知
             showCategoryNotification(category);
             
-            // 关闭下拉菜单
-            const dropdownMenu = document.getElementById('dropdownMenu');
-            if (dropdownMenu) {
-                dropdownMenu.classList.remove('show');
+            // 滚动到选中的分类
+            const activeBtn = document.querySelector(`[data-category="${category}"]`);
+            if (activeBtn) {
+                activeBtn.scrollIntoView({
+                    behavior: 'smooth',
+                    inline: 'center',
+                    block: 'nearest'
+                });
             }
         }
         
-        // 显示通知
+        /* ========== 通知功能 ========== */
         function showNotification(message, type = 'info') {
             const notification = document.createElement('div');
             notification.className = 'notification';
@@ -883,7 +909,6 @@
             
             notification.appendChild(text);
             
-            // 根据类型设置颜色
             if (type === 'success') {
                 notification.style.background = 'rgba(52, 152, 219, 0.8)';
             } else if (type === 'error') {
@@ -903,44 +928,33 @@
             }, 2000);
         }
         
-        // 显示分类切换通知
         function showCategoryNotification(category) {
             showNotification(`已切换到【${categoryNames[category]}】分类`, 'info');
         }
 
+        /* ========== 事件监听 ========== */
+        
         // 视频结束自动播放下一个
         videoElement.addEventListener('ended', function() {
             loadVideo();
         });
 
-        // 声音按钮点击事件
+        // 声音按钮
         soundBtn.addEventListener('click', function() {
-            // 切换静音状态
             isMuted = !isMuted;
             videoElement.muted = isMuted;
-            
-            // 更新图标
             updateSoundIcon();
         });
 
-        // 更新声音图标状态
         function updateSoundIcon() {
-            if (isMuted) {
-                soundIcon.src = iconUrls.soundOff;
-            } else {
-                soundIcon.src = iconUrls.soundOn;
-            }
+            soundIcon.src = isMuted ? iconUrls.soundOff : iconUrls.soundOn;
         }
 
-        // 初始化声音图标
-        updateSoundIcon();
-
-        // 点赞按钮点击事件
+        // 点赞按钮
         likeBtn.addEventListener('click', function() {
             this.classList.toggle('active');
             if (this.classList.contains('active')) {
                 likeIcon.src = iconUrls.heartSolid;
-                // 点赞动画效果
                 this.style.animation = 'pulse 0.5s';
                 setTimeout(() => {
                     this.style.animation = '';
@@ -950,21 +964,28 @@
             }
         });
 
-        // QQ按钮点击事件
+        // QQ按钮
         qqBtn.addEventListener('click', function() {
             window.open('https://www.baidu.com');
         });
 
-        // 下一个视频按钮
+        // 下一个视频按钮（底部）
         nextBtn.addEventListener('click', function() {
-            console.log('点击了下一个视频按钮');
             loadVideo();
         });
 
-        // 双击点赞功能
+        // 下一个视频按钮（顶部）
+        nextVideoBtn.addEventListener('click', function() {
+            this.style.animation = 'switchPulse 0.3s';
+            setTimeout(() => {
+                this.style.animation = '';
+            }, 300);
+            loadVideo();
+        });
+
+        // 双击点赞
         videoElement.addEventListener('dblclick', function(event) {
             likeBtn.click();
-            // 添加视觉反馈
             const effect = document.createElement('img');
             effect.className = 'heart-effect';
             effect.src = iconUrls.heartSolid;
@@ -996,85 +1017,132 @@
             loadingSpinner.style.display = 'none';
         });
         
-        // 分类按钮点击事件
+        // 分类按钮点击
         document.querySelectorAll('.category-btn').forEach(btn => {
             btn.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
                 const category = this.getAttribute('data-category');
-                console.log('分类按钮被点击:', category);
                 switchCategory(category);
             });
         });
         
-        // 下拉菜单项点击事件
-        document.querySelectorAll('.dropdown-item').forEach(item => {
-            item.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                const category = this.getAttribute('data-category');
-                console.log('下拉菜单项被点击:', category);
-                switchCategory(category);
-            });
-        });
-        
-        // 下拉菜单切换
-        document.getElementById('dropdownToggle').addEventListener('click', function(e) {
-            e.stopPropagation();
-            document.getElementById('dropdownMenu').classList.toggle('show');
-        });
-        
-        // 点击其他地方关闭下拉菜单
-        document.addEventListener('click', function(e) {
-            const dropdown = document.getElementById('dropdownMenu');
-            const toggle = document.getElementById('dropdownToggle');
-            if (!dropdown.contains(e.target) && e.target !== toggle) {
-                dropdown.classList.remove('show');
-            }
-        });
-
-        // ========== 向上滑动切换视频功能 ==========
-        
-        // 滑动手势处理
-        videoWrapper.addEventListener('touchstart', function(e) {
-            startY = e.touches[0].clientY;
-            isSwiping = true;
-        });
-        
-        videoWrapper.addEventListener('touchmove', function(e) {
-            if (!isSwiping) return;
-            currentY = e.touches[0].clientY;
-            
-            // 计算滑动距离
-            const deltaY = startY - currentY;
-            
-            // 如果是向上滑动且距离超过40像素阈值
-            if (deltaY > SWIPE_THRESHOLD) {
-                // 触发切换视频
-                loadVideo();
-                isSwiping = false;
-            }
-        });
-        
-        videoWrapper.addEventListener('touchend', function() {
-            isSwiping = false;
-        });
-        
-        // ========== API切换功能 ==========
-        
-        // API切换按钮点击事件
+        // API切换按钮
         apiSwitchBtn.addEventListener('click', toggleApiMode);
         
-        // 添加键盘快捷键支持 (Alt+S 切换API)
+        // 键盘快捷键
         document.addEventListener('keydown', function(e) {
             if (e.altKey && e.key === 's') {
                 e.preventDefault();
                 toggleApiMode();
             }
+            if (e.altKey && e.key === 'n') {
+                e.preventDefault();
+                loadVideo();
+            }
         });
         
         // 初始化API按钮状态
         updateApiButtonState();
+
+        /* ========== 改进的触摸交互 ========== */
+        
+        // 只允许在视频播放器特定区域进行下拉刷新
+        const videoContainer = document.querySelector('.video-player-container');
+        
+        videoContainer.addEventListener('touchstart', function(e) {
+            // 只允许从播放器顶部开始下拉
+            if (e.touches[0].clientY < videoContainer.offsetTop + 100) {
+                pullStartY = e.touches[0].clientY;
+                isPulling = true;
+            }
+        }, { passive: true });
+        
+        videoContainer.addEventListener('touchmove', function(e) {
+            if (!isPulling) return;
+            
+            currentY = e.touches[0].clientY;
+            const deltaY = currentY - pullStartY;
+            
+            if (deltaY > 0) {
+                e.preventDefault();
+                
+                // 限制最大下拉距离
+                const pullDistance = Math.min(deltaY, PULL_THRESHOLD * 1.5);
+                const progress = Math.min(pullDistance / PULL_THRESHOLD, 1);
+                
+                // 显示下拉刷新提示
+                pullToRefresh.style.opacity = progress * 0.8;
+                pullToRefresh.classList.toggle('active', progress > 0);
+                
+                // 轻微移动视频容器
+                videoContainer.style.transform = `translateY(${pullDistance * 0.3}px)`;
+            }
+        }, { passive: false });
+        
+        videoContainer.addEventListener('touchend', function() {
+            if (!isPulling) return;
+            
+            isPulling = false;
+            const currentTransform = parseFloat(videoContainer.style.transform.replace('translateY(', '').replace('px)', '')) || 0;
+            
+            // 动画回弹
+            videoContainer.style.transition = 'transform 0.3s ease-out';
+            videoContainer.style.transform = 'translateY(0px)';
+            
+            // 检查是否达到阈值
+            if (currentTransform > PULL_THRESHOLD * 0.3) {
+                // 触发刷新
+                setTimeout(() => {
+                    loadVideo();
+                    pullToRefresh.classList.remove('active');
+                }, 300);
+            } else {
+                pullToRefresh.classList.remove('active');
+            }
+            
+            // 重置过渡
+            setTimeout(() => {
+                videoContainer.style.transition = '';
+            }, 300);
+        });
+        
+        // 防止默认的滚动行为
+        document.addEventListener('touchmove', function(e) {
+            // 如果在视频区域内且不是下拉刷新操作，阻止默认滚动
+            if (e.target.closest('.video-player-container') && !isPulling) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+        
+        // 禁用视频元素的所有交互
+        videoElement.addEventListener('touchstart', function(e) {
+            e.stopPropagation();
+        });
+        
+        videoElement.addEventListener('touchmove', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }, { passive: false });
+        
+        videoElement.addEventListener('touchend', function(e) {
+            e.stopPropagation();
+        });
+        
+        // 确保控制按钮可以正常交互
+        document.querySelectorAll('.control-btn, .player-controls').forEach(element => {
+            element.addEventListener('touchstart', function(e) {
+                e.stopPropagation();
+            });
+            
+            element.addEventListener('touchmove', function(e) {
+                e.stopPropagation();
+            });
+            
+            element.addEventListener('touchend', function(e) {
+                e.stopPropagation();
+            });
+        });
     </script>
 </body>
 </html>
