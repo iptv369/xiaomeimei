@@ -1,16 +1,26 @@
-
-
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <link rel="icon" href="https://tx.2cnm.cn/tp/wywl.png">
-    <title>千寻百念工作室</title>
+    <title>Echo小姐姐</title>
+    <!-- ========== 修复图标路径 - 使用相对路径 ========== -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="manifest" href="site.webmanifest">
+    <meta name="theme-color" content="#3498db">
+    <link rel="icon" type="image/png" sizes="192x192" href="android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="android-chrome-512x512.png">
     <style>
         :root {
             --primary-color: #ff6b6b;
             --secondary-color: #4ecdc4;
+            --api-color: #3498db;
         }
 
         * {
@@ -35,27 +45,176 @@
             position: relative;
         }
         
-        .gender-toggle {
+        /* 美化自定义API切换按钮 */
+        .api-switch-container {
             position: absolute;
             top: 20px;
             right: 20px;
-            width: 45px;
-            height: 45px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .api-switch-btn {
+            width: 52px;
+            height: 52px;
+            background: rgba(52, 152, 219, 0.15);
+            border: 2px solid rgba(52, 152, 219, 0.3);
+            border-radius: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            z-index: 10;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             backdrop-filter: blur(10px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            box-shadow: 
+                0 4px 15px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
         }
 
-        .gender-toggle:hover {
-            background: rgba(255, 255, 255, 0.2);
-            box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.3);
+        .api-switch-btn:hover {
+            background: rgba(52, 152, 219, 0.25);
+            border-color: rgba(52, 152, 219, 0.5);
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 
+                0 8px 25px rgba(52, 152, 219, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        }
+
+        .api-switch-btn.active {
+            background: linear-gradient(135deg, var(--api-color), #2980b9);
+            border-color: var(--api-color);
+            box-shadow: 
+                0 8px 30px rgba(52, 152, 219, 0.5),
+                0 0 20px rgba(52, 152, 219, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            animation: apiGlow 2s infinite alternate;
+        }
+
+        .api-switch-btn.active:hover {
+            background: linear-gradient(135deg, #2980b9, #3498db);
+            border-color: #3498db;
+            box-shadow: 
+                0 10px 35px rgba(52, 152, 219, 0.6),
+                0 0 25px rgba(52, 152, 219, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.25);
+        }
+
+        .api-switch-btn .switch-icon {
+            font-size: 26px;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.3));
+        }
+
+        .api-switch-btn.active .switch-icon {
+            transform: rotate(180deg) scale(1.1);
+            filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.5));
+        }
+
+        /* 按钮发光效果 */
+        .api-switch-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at center, 
+                rgba(255, 255, 255, 0.1) 0%, 
+                transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            border-radius: 14px;
+        }
+
+        .api-switch-btn:hover::before {
+            opacity: 1;
+        }
+
+        /* 按钮内光晕效果 */
+        .api-switch-btn::after {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            background: linear-gradient(45deg, 
+                transparent 30%, 
+                rgba(52, 152, 219, 0.1) 45%, 
+                rgba(52, 152, 219, 0.2) 50%, 
+                rgba(52, 152, 219, 0.1) 55%, 
+                transparent 70%);
+            opacity: 0;
+            transition: opacity 0.6s ease;
+            z-index: -1;
+            border-radius: 20px;
+        }
+
+        .api-switch-btn.active::after {
+            opacity: 1;
+            animation: rotateLight 4s linear infinite;
+        }
+
+        .api-switch-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.7);
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            transition: all 0.3s ease;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+            padding: 2px 8px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+        }
+
+        .api-switch-btn.active + .api-switch-label {
+            color: #fff;
+            background: rgba(52, 152, 219, 0.3);
+            text-shadow: 0 0 10px rgba(52, 152, 219, 0.7);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        @keyframes apiGlow {
+            0% {
+                box-shadow: 
+                    0 8px 30px rgba(52, 152, 219, 0.5),
+                    0 0 20px rgba(52, 152, 219, 0.3),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            }
+            100% {
+                box-shadow: 
+                    0 8px 35px rgba(52, 152, 219, 0.7),
+                    0 0 25px rgba(52, 152, 219, 0.5),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            }
+        }
+
+        @keyframes rotateLight {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes switchPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes iconFlip {
+            0% { transform: rotateY(0deg); }
+            50% { transform: rotateY(180deg); }
+            100% { transform: rotateY(360deg); }
         }
         
         /* 分类选择器 */
@@ -341,11 +500,20 @@
             .video-wrapper {
                 margin-top: 70px;
             }
-            .gender-toggle {
+            .api-switch-container {
                 top: 15px;
                 right: 15px;
-                width: 40px;
-                height: 40px;
+            }
+            .api-switch-btn {
+                width: 46px;
+                height: 46px;
+            }
+            .api-switch-btn .switch-icon {
+                font-size: 22px;
+            }
+            .api-switch-label {
+                font-size: 10px;
+                padding: 1px 6px;
             }
             .category-selector {
                 top: 15px;
@@ -367,6 +535,14 @@
 </head>
 <body>
     <div class="app-container">
+        <!-- 美化后的API切换按钮（使用🔀图标） -->
+        <div class="api-switch-container">
+            <div class="api-switch-btn" id="apiSwitchBtn" title="切换API接口">
+                <div class="switch-icon">🔀</div>
+            </div>
+            <div class="api-switch-label" id="apiSwitchLabel">API</div>
+        </div>
+        
         <!-- 分类选择器 -->
         <div class="category-selector">
             <button class="category-btn active" data-category="jk">🎀 JK</button>
@@ -390,7 +566,7 @@
         <div class="floating-text">每日推荐精彩视频</div>
         <div class="video-wrapper" id="videoWrapper">
             <div class="decorative-border"></div>
-            <video id="video-element" playsinline autoplay muted></video>
+            <video id="video-element" playsinline muted></video>
             <div class="floating-controls">
                 <div class="control-group">
                     <button class="control-btn like-btn" id="likeBtn">
@@ -416,6 +592,10 @@
     </div>
 
     <script>
+        /* ========== 配置 ========== */
+        const DEFAULT_API_URL = 'https://api.5k4.cn/api/sjxjj';
+        const CUSTOM_API_URL = 'https://1301267920-6hd3qqiq8t.ap-guangzhou.tencentscf.com/';
+        
         // DOM元素引用
         const videoElement = document.getElementById('video-element');
         const videoWrapper = document.getElementById('videoWrapper');
@@ -428,23 +608,10 @@
         const nextIcon = document.getElementById('nextIcon');
         const loadingSpinner = document.getElementById('loadingSpinner');
         const spinnerIcon = document.getElementById('spinnerIcon');
-        // ... existing code ...
+        const apiSwitchBtn = document.getElementById('apiSwitchBtn');
+        const apiSwitchLabel = document.getElementById('apiSwitchLabel');
         
-        // 视频源配置
-        const apiBaseUrl = 'https://api.5k4.cn/api/sjxjj';
-        const videoSources = {
-            jk: apiBaseUrl + '?category=jk',
-            rewu: apiBaseUrl + '?category=rewu',
-            chuanda: apiBaseUrl + '?category=chuanda',
-            qingchun: apiBaseUrl + '?category=qingchun',
-            nvda: apiBaseUrl + '?category=nvda',
-            shejie: apiBaseUrl + '?category=shejie',
-            gaozhiliang: apiBaseUrl + '?category=gaozhiliang',
-            heisi: apiBaseUrl + '?category=heisi',
-            baisi: apiBaseUrl + '?category=baisi'
-        };
-        
-        // 分类名称映射
+        // 分类配置
         const categoryNames = {
             jk: 'JK制服',
             rewu: '热舞',
@@ -459,8 +626,6 @@
 
         // 图标URL定义
         const iconUrls = {
-            female: 'https://tx.2cnm.cn/tp/nusheng.png',
-            male: 'https://tx.2cnm.cn/tp/nansheng.png',
             heart: 'https://tx.2cnm.cn/tp/mdz.png',
             heartSolid: 'https://tx.2cnm.cn/tp/ydz.png',
             soundOn: 'https://tx.2cnm.cn/tp/ys.png',
@@ -470,18 +635,16 @@
             qq: 'https://tx.2cnm.cn/tp/qq.png'
         };
 
-        // 当前分类状态（默认为JK）
+        // 当前状态
         let currentCategory = 'jk';
-        // 保存静音状态
         let isMuted = true;
-        // 初始显示加载动画
-        loadingSpinner.style.display = 'block';
+        let isCustomApi = false;
         
         // 滑动手势相关变量
         let startY = 0;
         let currentY = 0;
         let isSwiping = false;
-        const SWIPE_THRESHOLD = 40; // 滑动阈值改为40像素
+        const SWIPE_THRESHOLD = 40;
         
         // 初始化图标
         function initIcons() {
@@ -494,30 +657,18 @@
         // 初始化图标
         initIcons();
         
-        // 初始化时加载第一个视频
-        loadVideo();
+        // 默认加载第一个视频
+        loadDefaultVideo();
 
-
-
-        // 加载新视频
-        function loadVideo() {
-            console.log('loadVideo被调用, 当前分类:', currentCategory);
+        /* ========== 视频加载函数（默认API） ========== */
+        function loadDefaultVideo() {
+            console.log('加载默认API视频，分类:', currentCategory);
             loadingSpinner.style.display = 'block';
             
-            // 从API获取视频URL
-            const apiUrl = videoSources[currentCategory];
+            const apiUrl = `${DEFAULT_API_URL}?category=${currentCategory}&t=${Date.now()}`;
             console.log('API URL:', apiUrl);
             
-            if (!apiUrl) {
-                console.error('未找到分类接口:', currentCategory);
-                loadingSpinner.style.display = 'none';
-                return;
-            }
-            
-            const fetchUrl = apiUrl + '&t=' + Date.now();
-            console.log('开始请求:', fetchUrl);
-            
-            fetch(fetchUrl)
+            fetch(apiUrl)
                 .then(response => {
                     console.log('收到响应:', response.status);
                     if (!response.ok) {
@@ -527,12 +678,16 @@
                 })
                 .then(data => {
                     console.log('响应数据:', data);
+                    
                     if (data.code === 200 && data.data && data.data.videoUrl) {
-                        console.log('视频URL:', data.data.videoUrl);
-                        videoElement.src = data.data.videoUrl;
+                        const videoUrl = data.data.videoUrl;
+                        console.log('视频URL:', videoUrl);
+                        
+                        // 设置视频源
+                        videoElement.src = videoUrl;
                         videoElement.muted = isMuted;
                         
-                        // 尝试播放视频
+                        // 自动播放
                         videoElement.play().catch(e => {
                             console.log('自动播放被阻止:', e);
                         });
@@ -544,26 +699,140 @@
                         // 更新声音图标
                         updateSoundIcon();
                     } else {
-                        console.error('视频获取失败:', data.msg || '未知错误', data);
+                        console.error('视频获取失败:', data);
                         loadingSpinner.style.display = 'none';
-                        showErrorNotification('视频加载失败，请重试');
+                        showNotification('视频加载失败，请重试', 'error');
                     }
                 })
                 .catch(error => {
                     console.error('接口请求失败:', error);
                     loadingSpinner.style.display = 'none';
                     
-                    // 判断并改造错误信息
-                    let errorMsg = 'API 基地址无效，请检查配置';
+                    let errorMsg = 'API 接口无法访问，请检查网络或基地址';
                     if (error.message.includes('CORS') || error.message.includes('Failed to fetch')) {
-                        errorMsg = 'API 接口无法访问，请检查网络或基地址';
+                        errorMsg = 'API 接口跨域请求被阻止';
                     }
-                    showErrorNotification(errorMsg);
+                    showNotification(errorMsg, 'error');
                 });
         }
 
+        /* ========== 视频加载函数（自定义API） ========== */
+        function loadCustomVideo() {
+            console.log('加载自定义API视频');
+            loadingSpinner.style.display = 'block';
+            
+            // 按照您提供的方法：直接设置video.src为API地址
+            // 必须静音，因为自定义API可能直接返回视频流
+            videoElement.muted = true;
+            videoElement.src = CUSTOM_API_URL + '?t=' + Date.now();
+            
+            // 播放视频
+            videoElement.play().then(() => {
+                console.log('自定义API视频开始播放');
+                // 3秒后打开声音（可选）
+                setTimeout(() => {
+                    if (!isMuted) {
+                        videoElement.muted = false;
+                        console.log('声音已打开');
+                    }
+                }, 300);
+            }).catch(e => {
+                console.log('自定义API播放失败:', e);
+                loadingSpinner.style.display = 'none';
+                showNotification('自定义接口播放失败', 'error');
+            });
+            
+            // 重置点赞状态
+            likeBtn.classList.remove('active');
+            likeIcon.src = iconUrls.heart;
+            
+            // 更新声音图标
+            updateSoundIcon();
+        }
+
+        /* ========== 通用视频加载函数 ========== */
+        function loadVideo() {
+            if (isCustomApi) {
+                loadCustomVideo();
+            } else {
+                loadDefaultVideo();
+            }
+        }
+        
+        /* ========== 切换API函数 ========== */
+        function toggleApiMode() {
+            // 添加点击动画效果
+            apiSwitchBtn.style.animation = 'switchPulse 0.3s';
+            const switchIcon = apiSwitchBtn.querySelector('.switch-icon');
+            switchIcon.style.animation = 'iconFlip 0.6s ease-out';
+            
+            setTimeout(() => {
+                apiSwitchBtn.style.animation = '';
+                switchIcon.style.animation = '';
+            }, 600);
+            
+            if (isCustomApi) {
+                // 切换回默认API
+                isCustomApi = false;
+                apiSwitchBtn.classList.remove('active');
+                updateApiButtonState();
+                
+                // 启用分类选择器
+                document.querySelectorAll('.category-btn, .dropdown-toggle, .dropdown-item').forEach(btn => {
+                    btn.style.opacity = '1';
+                    btn.style.pointerEvents = 'auto';
+                });
+                
+                // 显示通知
+                showNotification('已切换到默认接口', 'success');
+                
+                // 重新加载默认分类的视频
+                currentCategory = 'jk';
+                document.querySelectorAll('.category-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.querySelector(`[data-category="jk"]`).classList.add('active');
+                loadDefaultVideo();
+            } else {
+                // 切换到自定义API
+                isCustomApi = true;
+                apiSwitchBtn.classList.add('active');
+                updateApiButtonState();
+                
+                // 禁用分类选择器
+                document.querySelectorAll('.category-btn, .dropdown-toggle, .dropdown-item').forEach(btn => {
+                    btn.style.opacity = '0.5';
+                    btn.style.pointerEvents = 'none';
+                });
+                
+                // 显示通知
+                showNotification('已切换到自定义接口', 'success');
+                
+                // 使用自定义API加载视频
+                loadCustomVideo();
+            }
+        }
+        
+        // 更新API按钮状态
+        function updateApiButtonState() {
+            if (isCustomApi) {
+                apiSwitchLabel.textContent = '自定义';
+                apiSwitchLabel.style.color = '#fff';
+                apiSwitchLabel.style.background = 'rgba(52, 152, 219, 0.4)';
+            } else {
+                apiSwitchLabel.textContent = '默认';
+                apiSwitchLabel.style.color = 'rgba(255, 255, 255, 0.7)';
+                apiSwitchLabel.style.background = 'rgba(0, 0, 0, 0.3)';
+            }
+        }
+        
         // 切换分类
         function switchCategory(category) {
+            if (isCustomApi) {
+                showNotification('自定义接口不支持分类切换', 'error');
+                return;
+            }
+            
             console.log('切换分类:', category, '当前分类:', currentCategory);
             
             if (category === currentCategory) {
@@ -602,17 +871,27 @@
             }
         }
         
-        // 显示分类切换通知
-        function showCategoryNotification(category) {
+        // 显示通知
+        function showNotification(message, type = 'info') {
             const notification = document.createElement('div');
             notification.className = 'notification';
             
             const text = document.createElement('span');
-            text.textContent = `已切换到【${categoryNames[category]}】分类`;
+            text.textContent = message;
             text.style.color = '#fff';
             text.style.textShadow = '0 2px 4px rgba(0,0,0,0.5)';
             
             notification.appendChild(text);
+            
+            // 根据类型设置颜色
+            if (type === 'success') {
+                notification.style.background = 'rgba(52, 152, 219, 0.8)';
+            } else if (type === 'error') {
+                notification.style.background = 'rgba(255, 107, 107, 0.8)';
+            } else {
+                notification.style.background = 'rgba(0, 0, 0, 0.7)';
+            }
+            
             document.body.appendChild(notification);
             
             setTimeout(() => {
@@ -624,33 +903,10 @@
             }, 2000);
         }
         
-        // 显示错误通知
-        function showErrorNotification(message) {
-            const notification = document.createElement('div');
-            notification.className = 'notification';
-            notification.style.background = 'rgba(255, 107, 107, 0.8)';
-            
-            const text = document.createElement('span');
-            text.textContent = message;
-            text.style.color = '#fff';
-            text.style.textShadow = '0 2px 4px rgba(0,0,0,0.5)';
-            
-            notification.appendChild(text);
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.style.opacity = '0';
-                notification.style.transition = 'opacity 0.5s';
-                setTimeout(() => {
-                    document.body.removeChild(notification);
-                }, 500);
-            }, 3000);
+        // 显示分类切换通知
+        function showCategoryNotification(category) {
+            showNotification(`已切换到【${categoryNames[category]}】分类`, 'info');
         }
-        
-        // 切换模式（男生视频）
-        // function toggleGenderMode() {
-        //     switchCategory('male');
-        // }
 
         // 视频结束自动播放下一个
         videoElement.addEventListener('ended', function() {
@@ -740,11 +996,6 @@
             loadingSpinner.style.display = 'none';
         });
         
-        // ... existing code ...
-        
-        // 添加模式切换监听（已禁用）
-        // genderToggle.addEventListener('click', toggleGenderMode);
-        
         // 分类按钮点击事件
         document.querySelectorAll('.category-btn').forEach(btn => {
             btn.addEventListener('click', function(e) {
@@ -808,6 +1059,22 @@
         videoWrapper.addEventListener('touchend', function() {
             isSwiping = false;
         });
+        
+        // ========== API切换功能 ==========
+        
+        // API切换按钮点击事件
+        apiSwitchBtn.addEventListener('click', toggleApiMode);
+        
+        // 添加键盘快捷键支持 (Alt+S 切换API)
+        document.addEventListener('keydown', function(e) {
+            if (e.altKey && e.key === 's') {
+                e.preventDefault();
+                toggleApiMode();
+            }
+        });
+        
+        // 初始化API按钮状态
+        updateApiButtonState();
     </script>
 </body>
 </html>
