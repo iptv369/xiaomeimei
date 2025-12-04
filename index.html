@@ -23,6 +23,7 @@
             --api-color: #3498db;
             --error-color: #e74c3c;
             --warning-color: #f39c12;
+            --success-color: #2ecc71;
         }
 
         * {
@@ -489,6 +490,10 @@
         .warning-notification {
             background: rgba(243, 156, 18, 0.8);
         }
+        
+        .success-notification {
+            background: rgba(46, 204, 113, 0.8);
+        }
 
         .qq-icon {
             width: 24px;
@@ -616,6 +621,37 @@
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
         }
+        
+        /* 状态指示器 */
+        .status-indicator {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 10;
+            backdrop-filter: blur(10px);
+        }
+        
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--success-color);
+        }
+        
+        .status-dot.warning {
+            background: var(--warning-color);
+        }
+        
+        .status-dot.error {
+            background: var(--error-color);
+        }
 
         @media (max-width: 480px) {
             .app-container {
@@ -698,6 +734,13 @@
                 padding: 10px 20px;
                 font-size: 14px;
             }
+            
+            .status-indicator {
+                top: 15px;
+                left: 15px;
+                font-size: 12px;
+                padding: 6px 12px;
+            }
         }
 
         @media (max-width: 360px) {
@@ -748,6 +791,12 @@
                 </div>
                 <div class="api-switch-label" id="apiSwitchLabel">API</div>
             </div>
+        </div>
+        
+        <!-- 状态指示器 -->
+        <div class="status-indicator" id="statusIndicator">
+            <div class="status-dot" id="statusDot"></div>
+            <span id="statusText">加载中...</span>
         </div>
         
         <!-- 视频播放器区域 -->
@@ -835,6 +884,9 @@
         const categoryScroll = document.getElementById('categoryScroll');
         const pullToRefresh = document.getElementById('pullToRefresh');
         const swipeHint = document.getElementById('swipeHint');
+        const statusIndicator = document.getElementById('statusIndicator');
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
         
         // 分类配置
         const categoryNames = {
@@ -865,10 +917,13 @@
         let isMuted = true;
         let isCustomApi = false;
         let isFullscreen = false;
-        let failedVideos = new Set(); // 记录失败的视频URL
+        let failedVideos = new Map(); // 记录失败的视频URL及失败时间
         let retryCount = 0;
-        const MAX_RETRY_COUNT = 3; // 最大重试次数
-        const AUTO_SKIP_DELAY = 2000; // 自动跳过延迟（毫秒）
+        const MAX_RETRY_COUNT = 2; // 最大重试次数（减少到2次）
+        const AUTO_SKIP_DELAY = 5000; // 自动跳过延迟（毫秒）（增加到5秒）
+        const VIDEO_TIMEOUT = 30000; // 视频加载超时时间（增加到30秒）
+        const API_TIMEOUT = 20000; // API请求超时时间（增加到20秒）
+        const FAILED_VIDEO_EXPIRY = 300000; // 失败视频记录有效期（5分钟）
         
         // 触摸相关变量
         let pullStartY = 0;
@@ -885,6 +940,7 @@
         
         // 初始化
         initIcons();
+        updateStatus('加载中', 'warning');
         
         // 默认加载第一个视频
         loadDefaultVideo();
@@ -894,17 +950,38 @@
             swipeHint.classList.add('hidden');
         }, 3000);
 
+        /* ========== 状态更新函数 ========== */
+        function updateStatus(text, type = 'info') {
+            statusText.textContent = text;
+            
+            // 重置所有状态类
+            statusDot.className = 'status-dot';
+            
+            // 根据类型添加相应类
+            if (type === 'success') {
+                statusDot.classList.add('success');
+            } else if (type === 'warning') {
+                statusDot.classList.add('warning');
+            } else if (type === 'error') {
+                statusDot.classList.add('error');
+            }
+        }
+
         /* ========== 视频加载函数 ========== */
         function loadDefaultVideo() {
             console.log('加载默认API视频，分类:', currentCategory);
             loadingSpinner.style.display = 'block';
             hideErrorOverlay();
+            updateStatus('加载中...', 'warning');
             
             const apiUrl = `${DEFAULT_API_URL}?category=${currentCategory}&t=${Date.now()}`;
             console.log('API URL:', apiUrl);
             
+            // 清理过期的失败记录
+            cleanExpiredFailures();
+            
             fetch(apiUrl, { 
-                signal: AbortSignal.timeout(10000) // 10秒超时
+                signal: AbortSignal.timeout(API_TIMEOUT)
             })
                 .then(response => {
                     console.log('收到响应:', response.status);
@@ -920,11 +997,11 @@
                         const videoUrl = data.data.videoUrl;
                         console.log('视频URL:', videoUrl);
                         
-                        // 检查是否是已失败的视频
-                        if (failedVideos.has(videoUrl)) {
-                            console.log('跳过已失败的视频:', videoUrl);
-                            showNotification('视频已失效，自动跳过', 'warning');
-                            setTimeout(() => loadVideo(), 1000); // 延迟1秒后重试
+                        // 检查是否是已失败的视频（5分钟内）
+                        if (isVideoRecentlyFailed(videoUrl)) {
+                            console.log('跳过近期失败的视频:', videoUrl);
+                            showNotification('跳过近期失败视频', 'warning');
+                            setTimeout(() => loadVideo(), 1000);
                             return;
                         }
                         
@@ -940,13 +1017,14 @@
                             console.log('视频加载超时');
                             videoElement.src = ''; // 清除视频源
                             handleVideoError(videoUrl, '视频加载超时');
-                        }, 15000); // 15秒加载超时
+                        }, VIDEO_TIMEOUT);
                         
                         // 监听视频加载事件
                         const handleVideoLoad = () => {
                             clearTimeout(videoLoadTimeout);
                             console.log('视频加载成功');
                             loadingSpinner.style.display = 'none';
+                            updateStatus('播放中', 'success');
                         };
                         
                         videoElement.addEventListener('loadeddata', handleVideoLoad, { once: true });
@@ -956,6 +1034,7 @@
                             console.log('视频开始播放');
                             clearTimeout(videoLoadTimeout);
                             loadingSpinner.style.display = 'none';
+                            updateStatus('播放中', 'success');
                             
                             // 重置点赞状态
                             likeBtn.classList.remove('active');
@@ -971,23 +1050,25 @@
                     } else {
                         console.error('视频获取失败:', data);
                         loadingSpinner.style.display = 'none';
+                        updateStatus('API返回无效数据', 'error');
                         showNotification('视频加载失败，自动跳过', 'error');
-                        setTimeout(() => loadVideo(), AUTO_SKIP_DELAY); // 延迟后自动跳过
+                        setTimeout(() => loadVideo(), AUTO_SKIP_DELAY);
                     }
                 })
                 .catch(error => {
                     console.error('接口请求失败:', error);
                     loadingSpinner.style.display = 'none';
+                    updateStatus('API请求失败', 'error');
                     
-                    let errorMsg = 'API 接口无法访问，自动跳过';
+                    let errorMsg = 'API 接口无法访问';
                     if (error.name === 'AbortError') {
-                        errorMsg = '请求超时，自动跳过';
+                        errorMsg = '请求超时';
                     } else if (error.message.includes('CORS') || error.message.includes('Failed to fetch')) {
                         errorMsg = 'API 接口跨域请求被阻止';
                     }
                     
                     showNotification(errorMsg, 'error');
-                    setTimeout(() => loadVideo(), AUTO_SKIP_DELAY); // 延迟后自动跳过
+                    setTimeout(() => loadVideo(), AUTO_SKIP_DELAY);
                 });
         }
 
@@ -995,6 +1076,7 @@
             console.log('加载自定义API视频');
             loadingSpinner.style.display = 'block';
             hideErrorOverlay();
+            updateStatus('加载自定义API...', 'warning');
             
             videoElement.muted = true;
             videoElement.src = CUSTOM_API_URL + '?t=' + Date.now();
@@ -1004,12 +1086,13 @@
                 console.log('自定义API视频加载超时');
                 videoElement.src = '';
                 handleVideoError(CUSTOM_API_URL, '自定义接口加载超时');
-            }, 15000);
+            }, VIDEO_TIMEOUT);
             
             videoElement.play().then(() => {
                 console.log('自定义API视频开始播放');
                 clearTimeout(videoLoadTimeout);
                 loadingSpinner.style.display = 'none';
+                updateStatus('播放中', 'success');
                 
                 setTimeout(() => {
                     if (!isMuted) {
@@ -1040,17 +1123,18 @@
         /* ========== 视频错误处理 ========== */
         function handleVideoError(videoUrl, errorMessage = '视频加载失败') {
             loadingSpinner.style.display = 'none';
+            updateStatus('视频加载失败', 'error');
             
-            // 记录失败的视频
+            // 记录失败的视频（带时间戳）
             if (videoUrl) {
-                failedVideos.add(videoUrl);
+                failedVideos.set(videoUrl, Date.now());
             }
             
             // 检查重试次数
             if (retryCount < MAX_RETRY_COUNT) {
                 retryCount++;
                 console.log(`第 ${retryCount} 次重试...`);
-                showErrorNotification(`${errorMessage}，第 ${retryCount}/${MAX_RETRY_COUNT} 次重试`, 'warning');
+                showNotification(`${errorMessage}，第 ${retryCount}/${MAX_RETRY_COUNT} 次重试`, 'warning');
                 
                 // 延迟后自动重试
                 setTimeout(() => {
@@ -1068,7 +1152,7 @@
                     console.log('自动跳过失效视频...');
                     hideErrorOverlay();
                     loadVideo();
-                }, 5000); // 5秒后自动跳过
+                }, AUTO_SKIP_DELAY);
             }
         }
         
@@ -1089,6 +1173,8 @@
                 notification.classList.add('error-notification');
             } else if (type === 'warning') {
                 notification.classList.add('warning-notification');
+            } else if (type === 'success') {
+                notification.classList.add('success-notification');
             }
             
             const text = document.createElement('span');
@@ -1108,22 +1194,44 @@
             }, 3000);
         }
         
+        /* ========== 辅助函数 ========== */
+        function isVideoRecentlyFailed(url) {
+            if (!failedVideos.has(url)) return false;
+            
+            const failTime = failedVideos.get(url);
+            const currentTime = Date.now();
+            return (currentTime - failTime) < FAILED_VIDEO_EXPIRY;
+        }
+        
+        function cleanExpiredFailures() {
+            const currentTime = Date.now();
+            for (const [url, time] of failedVideos.entries()) {
+                if (currentTime - time > FAILED_VIDEO_EXPIRY) {
+                    failedVideos.delete(url);
+                }
+            }
+        }
+        
         /* ========== 视频事件监听 ========== */
         videoElement.addEventListener('error', (e) => {
             console.error('视频元素错误:', e);
             const videoUrl = videoElement.src;
-            if (videoUrl) {
-                handleVideoError(videoUrl, '视频格式错误或无法播放');
-            } else {
-                handleVideoError(null, '视频加载失败');
+            const errorCode = videoElement.error ? videoElement.error.code : null;
+            
+            let errorMessage = '视频加载失败';
+            if (errorCode !== null) {
+                switch(errorCode) {
+                    case 1: errorMessage = '视频加载被中止'; break;
+                    case 2: errorMessage = '网络错误'; break;
+                    case 3: errorMessage = '视频解码错误'; break;
+                    case 4: errorMessage = '视频格式不支持'; break;
+                }
             }
-        });
-        
-        videoElement.addEventListener('stalled', () => {
-            console.log('视频数据加载停滞');
-            const videoUrl = videoElement.src;
+            
             if (videoUrl) {
-                handleVideoError(videoUrl, '视频加载停滞');
+                handleVideoError(videoUrl, errorMessage);
+            } else {
+                handleVideoError(null, errorMessage);
             }
         });
         
@@ -1158,6 +1266,7 @@
                 categoryScroll.style.pointerEvents = 'auto';
                 
                 showNotification('已切换到默认接口', 'success');
+                updateStatus('已切换到默认接口', 'success');
                 
                 currentCategory = 'jk';
                 document.querySelectorAll('.category-btn').forEach(btn => {
@@ -1176,6 +1285,7 @@
                 categoryScroll.style.pointerEvents = 'none';
                 
                 showNotification('已切换到自定义接口', 'success');
+                updateStatus('已切换到自定义接口', 'success');
                 loadCustomVideo();
             }
         }
@@ -1205,6 +1315,7 @@
                 document.querySelector('.floating-text').style.opacity = '0';
                 document.querySelector('.top-toolbar').style.opacity = '0';
                 document.querySelector('.top-toolbar').style.pointerEvents = 'none';
+                statusIndicator.style.opacity = '0';
                 
                 // 强制视频元素全屏
                 if (videoElement.requestFullscreen) {
@@ -1227,6 +1338,7 @@
                 document.querySelector('.floating-text').style.opacity = '1';
                 document.querySelector('.top-toolbar').style.opacity = '1';
                 document.querySelector('.top-toolbar').style.pointerEvents = 'auto';
+                statusIndicator.style.opacity = '1';
                 
                 // 退出全屏
                 if (document.exitFullscreen) {
@@ -1262,6 +1374,7 @@
                 document.querySelector('.floating-text').style.opacity = '1';
                 document.querySelector('.top-toolbar').style.opacity = '1';
                 document.querySelector('.top-toolbar').style.pointerEvents = 'auto';
+                statusIndicator.style.opacity = '1';
             }
         }
         
@@ -1300,21 +1413,22 @@
             const notification = document.createElement('div');
             notification.className = 'notification';
             
+            if (type === 'success') {
+                notification.classList.add('success-notification');
+            } else if (type === 'error') {
+                notification.classList.add('error-notification');
+            } else if (type === 'warning') {
+                notification.classList.add('warning-notification');
+            } else {
+                notification.style.background = 'rgba(0, 0, 0, 0.7)';
+            }
+            
             const text = document.createElement('span');
             text.textContent = message;
             text.style.color = '#fff';
             text.style.textShadow = '0 2px 4px rgba(0,0,0,0.5)';
             
             notification.appendChild(text);
-            
-            if (type === 'success') {
-                notification.style.background = 'rgba(52, 152, 219, 0.8)';
-            } else if (type === 'error') {
-                notification.classList.add('error-notification');
-            } else {
-                notification.style.background = 'rgba(0, 0, 0, 0.7)';
-            }
-            
             document.body.appendChild(notification);
             
             setTimeout(() => {
@@ -1397,14 +1511,17 @@
         // 加载状态处理
         videoElement.addEventListener('waiting', () => {
             loadingSpinner.style.display = 'block';
+            updateStatus('缓冲中...', 'warning');
         });
 
         videoElement.addEventListener('playing', () => {
             loadingSpinner.style.display = 'none';
+            updateStatus('播放中', 'success');
         });
 
         videoElement.addEventListener('loadeddata', () => {
             loadingSpinner.style.display = 'none';
+            updateStatus('准备播放', 'success');
         });
         
         // 分类按钮点击
