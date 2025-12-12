@@ -6,7 +6,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <link rel="icon" href="https://tx.2cnm.cn/tp/wywl.png">
-    <title>Echo小姐姐 - 本地视频播放器</title>
+    <title>Echo小姐姐</title>
     <!-- ========== 修复图标路径 - 使用相对路径 ========== -->
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
@@ -21,7 +21,7 @@
             --primary-color: #ff6b6b;
             --secondary-color: #4ecdc4;
             --api-color: #3498db;
-            --local-color: #9b59b6;
+            --local-color: #4CAF50;
         }
 
         * {
@@ -120,14 +120,21 @@
             color: #fff;
         }
         
+        /* 按钮容器 */
+        .button-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+        
         /* API切换按钮容器 */
         .api-switch-container {
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 6px;
-            margin-left: 10px;
-            flex-shrink: 0;
+            position: relative;
         }
 
         .api-switch-btn {
@@ -176,70 +183,49 @@
                 0 0 25px rgba(52, 152, 219, 0.4),
                 inset 0 1px 0 rgba(255, 255, 255, 0.25);
         }
-
-        /* 本地视频按钮 */
-        .local-video-btn {
-            width: 52px;
-            height: 52px;
-            background: rgba(155, 89, 182, 0.15);
-            border: 2px solid rgba(155, 89, 182, 0.3);
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            backdrop-filter: blur(10px);
-            box-shadow: 
-                0 4px 15px rgba(0, 0, 0, 0.2),
-                inset 0 1px 0 rgba(255, 255, 255, 0.1);
-            position: relative;
-            overflow: hidden;
+        
+        /* 本地源按钮样式 */
+        .local-source-btn {
+            background: rgba(76, 175, 80, 0.15);
+            border: 2px solid rgba(76, 175, 80, 0.3);
         }
-
-        .local-video-btn:hover {
-            background: rgba(155, 89, 182, 0.25);
-            border-color: rgba(155, 89, 182, 0.5);
-            transform: translateY(-2px) scale(1.05);
-            box-shadow: 
-                0 8px 25px rgba(155, 89, 182, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        
+        .local-source-btn:hover {
+            background: rgba(76, 175, 80, 0.25);
+            border-color: rgba(76, 175, 80, 0.5);
         }
-
-        .local-video-btn.active {
-            background: linear-gradient(135deg, var(--local-color), #8e44ad);
+        
+        .local-source-btn.active {
+            background: linear-gradient(135deg, var(--local-color), #388E3C);
             border-color: var(--local-color);
             box-shadow: 
-                0 8px 30px rgba(155, 89, 182, 0.5),
-                0 0 20px rgba(155, 89, 182, 0.3),
+                0 8px 30px rgba(76, 175, 80, 0.5),
+                0 0 20px rgba(76, 175, 80, 0.3),
                 inset 0 1px 0 rgba(255, 255, 255, 0.2);
             animation: localGlow 2s infinite alternate;
         }
-
-        .local-video-btn.active:hover {
-            background: linear-gradient(135deg, #8e44ad, #9b59b6);
-            border-color: #9b59b6;
+        
+        .local-source-btn.active:hover {
+            background: linear-gradient(135deg, #388E3C, #4CAF50);
+            border-color: #4CAF50;
             box-shadow: 
-                0 10px 35px rgba(155, 89, 182, 0.6),
-                0 0 25px rgba(155, 89, 182, 0.4),
+                0 10px 35px rgba(76, 175, 80, 0.6),
+                0 0 25px rgba(76, 175, 80, 0.4),
                 inset 0 1px 0 rgba(255, 255, 255, 0.25);
         }
 
-        .api-switch-btn .switch-icon,
-        .local-video-btn .local-icon {
+        .api-switch-btn .switch-icon {
             font-size: 26px;
             transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
             filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.3));
         }
 
-        .api-switch-btn.active .switch-icon,
-        .local-video-btn.active .local-icon {
+        .api-switch-btn.active .switch-icon {
             transform: rotate(180deg) scale(1.1);
             filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.5));
         }
 
-        .api-switch-label,
-        .local-video-label {
+        .api-switch-label {
             font-size: 11px;
             font-weight: 700;
             color: rgba(255, 255, 255, 0.7);
@@ -260,12 +246,9 @@
             text-shadow: 0 0 10px rgba(52, 152, 219, 0.7);
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
         }
-
-        .local-video-btn.active + .local-video-label {
-            color: #fff;
-            background: rgba(155, 89, 182, 0.4);
-            text-shadow: 0 0 10px rgba(155, 89, 182, 0.7);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        
+        .local-source-btn.active + .api-switch-label {
+            background: rgba(76, 175, 80, 0.4);
         }
 
         @keyframes apiGlow {
@@ -282,18 +265,18 @@
                     inset 0 1px 0 rgba(255, 255, 255, 0.3);
             }
         }
-
+        
         @keyframes localGlow {
             0% {
                 box-shadow: 
-                    0 8px 30px rgba(155, 89, 182, 0.5),
-                    0 0 20px rgba(155, 89, 182, 0.3),
+                    0 8px 30px rgba(76, 175, 80, 0.5),
+                    0 0 20px rgba(76, 175, 80, 0.3),
                     inset 0 1px 0 rgba(255, 255, 255, 0.2);
             }
             100% {
                 box-shadow: 
-                    0 8px 35px rgba(155, 89, 182, 0.7),
-                    0 0 25px rgba(155, 89, 182, 0.5),
+                    0 8px 35px rgba(76, 175, 80, 0.7),
+                    0 0 25px rgba(76, 175, 80, 0.5),
                     inset 0 1px 0 rgba(255, 255, 255, 0.3);
             }
         }
@@ -504,11 +487,6 @@
             100% { transform: translateY(0px); }
         }
 
-        @keyframes popIn {
-            0% { transform: scale(0.5); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-
         @keyframes fadeOut {
             0% { opacity: 0.8; transform: translate(-50%, -50%) scale(1); }
             50% { opacity: 0.5; transform: translate(-50%, -120%) scale(1.5); }
@@ -613,24 +591,6 @@
             animation: fa-spin 1s infinite linear;
         }
 
-        /* 本地视频计数器 */
-        .local-video-counter {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            background: rgba(155, 89, 182, 0.8);
-            backdrop-filter: blur(10px);
-            color: white;
-            padding: 6px 12px;
-            border-radius: 15px;
-            font-size: 12px;
-            font-weight: 600;
-            z-index: 5;
-            display: none;
-            pointer-events: none;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
         @media (max-width: 480px) {
             .app-container {
                 padding: 10px;
@@ -649,7 +609,7 @@
             }
             
             .category-selector {
-                max-width: calc(100% - 140px);
+                max-width: calc(100% - 120px);
             }
             
             .category-btn {
@@ -657,19 +617,16 @@
                 font-size: 12px;
             }
             
-            .api-switch-btn,
-            .local-video-btn {
+            .api-switch-btn {
                 width: 46px;
                 height: 46px;
             }
             
-            .api-switch-btn .switch-icon,
-            .local-video-btn .local-icon {
+            .api-switch-btn .switch-icon {
                 font-size: 22px;
             }
             
-            .api-switch-label,
-            .local-video-label {
+            .api-switch-label {
                 font-size: 10px;
                 padding: 1px 6px;
             }
@@ -701,13 +658,6 @@
                 left: 15px;
                 right: 15px;
             }
-            
-            .local-video-counter {
-                top: 10px;
-                left: 10px;
-                padding: 5px 10px;
-                font-size: 11px;
-            }
         }
 
         @media (max-width: 360px) {
@@ -716,14 +666,16 @@
                 font-size: 11px;
             }
             
-            .api-switch-btn,
-            .local-video-btn {
+            .category-selector {
+                max-width: calc(100% - 110px);
+            }
+            
+            .api-switch-btn {
                 width: 42px;
                 height: 42px;
             }
             
-            .api-switch-btn .switch-icon,
-            .local-video-btn .local-icon {
+            .api-switch-btn .switch-icon {
                 font-size: 20px;
             }
             
@@ -753,29 +705,29 @@
                 </div>
             </div>
             
-            <!-- API切换按钮 -->
-            <div class="api-switch-container">
-                <div class="api-switch-btn" id="apiSwitchBtn" title="切换API接口">
-                    <div class="switch-icon">🔀</div>
+            <!-- 按钮容器 -->
+            <div class="button-container">
+                <!-- API切换按钮 -->
+                <div class="api-switch-container">
+                    <div class="api-switch-btn" id="apiSwitchBtn" title="切换API接口">
+                        <div class="switch-icon">🔀</div>
+                    </div>
+                    <div class="api-switch-label" id="apiSwitchLabel">API</div>
                 </div>
-                <div class="api-switch-label" id="apiSwitchLabel">API</div>
-            </div>
-            
-            <!-- 本地视频按钮 -->
-            <div class="api-switch-container">
-                <div class="local-video-btn" id="localVideoBtn" title="播放本地视频源">
-                    <div class="local-icon">📁</div>
+                
+                <!-- 新增：本地源按钮 -->
+                <div class="api-switch-container">
+                    <div class="api-switch-btn local-source-btn" id="localSourceBtn" title="本地视频源">
+                        <div class="switch-icon">📁</div>
+                    </div>
+                    <div class="api-switch-label" id="localSourceLabel">本地</div>
                 </div>
-                <div class="local-video-label" id="localVideoLabel">本地</div>
             </div>
         </div>
         
         <!-- 视频播放器区域 -->
         <div class="video-player-container">
             <div class="floating-text">每日推荐精彩视频</div>
-            
-            <!-- 本地视频计数器 -->
-            <div class="local-video-counter" id="localVideoCounter">第 1/65 个</div>
             
             <!-- 下拉刷新提示 -->
             <div class="pull-to-refresh" id="pullToRefresh">
@@ -823,9 +775,6 @@
         </div>
     </div>
 
-    <!-- 加载本地视频源JS文件 -->
-    <script src="/local-videos.js"></script>
-
     <script>
         /* ========== 配置 ========== */
         const DEFAULT_API_URL = 'https://api.5k4.cn/api/sjxjj';
@@ -846,9 +795,8 @@
         const spinnerIcon = document.getElementById('spinnerIcon');
         const apiSwitchBtn = document.getElementById('apiSwitchBtn');
         const apiSwitchLabel = document.getElementById('apiSwitchLabel');
-        const localVideoBtn = document.getElementById('localVideoBtn');
-        const localVideoLabel = document.getElementById('localVideoLabel');
-        const localVideoCounter = document.getElementById('localVideoCounter');
+        const localSourceBtn = document.getElementById('localSourceBtn');
+        const localSourceLabel = document.getElementById('localSourceLabel');
         const categoryScroll = document.getElementById('categoryScroll');
         const pullToRefresh = document.getElementById('pullToRefresh');
         const swipeHint = document.getElementById('swipeHint');
@@ -881,9 +829,9 @@
         let currentCategory = 'jk';
         let isMuted = true;
         let isCustomApi = false;
-        let isLocalVideo = false;
+        let isLocalSource = false;
         let isFullscreen = false;
-        let currentLocalVideoIndex = 0;
+        let localVideoIndex = 0;
         
         // 触摸相关变量
         let pullStartY = 0;
@@ -903,6 +851,9 @@
         
         // 默认加载第一个视频
         loadDefaultVideo();
+        
+        // 加载本地视频源数据
+        loadLocalVideoSources();
         
         // 隐藏滑动提示
         setTimeout(() => {
@@ -947,9 +898,6 @@
                         
                         // 更新声音图标
                         updateSoundIcon();
-                        
-                        // 隐藏本地视频计数器
-                        localVideoCounter.style.display = 'none';
                     } else {
                         console.error('视频获取失败:', data);
                         loadingSpinner.style.display = 'none';
@@ -992,66 +940,53 @@
             likeBtn.classList.remove('active');
             likeIcon.src = iconUrls.heart;
             updateSoundIcon();
-            
-            // 隐藏本地视频计数器
-            localVideoCounter.style.display = 'none';
         }
 
         function loadLocalVideo() {
             console.log('加载本地视频');
             loadingSpinner.style.display = 'block';
             
-            // 检查本地视频数据是否加载
-            if (!window.LOCAL_VIDEO_LIST || window.LOCAL_VIDEO_LIST.length === 0) {
-                showNotification('本地视频源未找到，请检查 local-videos.js 文件', 'error');
+            // 检查是否加载了本地视频源
+            if (!window.VIDEO_SOURCES || window.VIDEO_SOURCES.length === 0) {
+                console.error('本地视频源未加载');
                 loadingSpinner.style.display = 'none';
+                showNotification('请先加载本地视频源', 'error');
                 return;
             }
             
-            // 获取当前视频URL
-            const videoUrl = window.LOCAL_VIDEO_LIST[currentLocalVideoIndex];
+            // 获取下一个本地视频
+            const videoUrl = window.VIDEO_SOURCES[localVideoIndex];
             console.log('本地视频URL:', videoUrl);
             
             // 设置视频源
             videoElement.src = videoUrl;
             videoElement.muted = isMuted;
             
-            // 自动播放
-            videoElement.play().catch(e => {
-                console.log('本地视频自动播放被阻止:', e);
+            videoElement.play().then(() => {
+                console.log('本地视频开始播放');
+                
+                // 更新索引
+                localVideoIndex = (localVideoIndex + 1) % window.VIDEO_SOURCES.length;
+                
+                // 显示当前视频信息
+                const total = window.VIDEO_SOURCES.length;
+                const current = (localVideoIndex === 0 ? total : localVideoIndex);
+                showNotification(`本地视频 ${current}/${total}`, 'success');
+                
+            }).catch(e => {
+                console.log('本地视频播放失败:', e);
                 loadingSpinner.style.display = 'none';
+                showNotification('本地视频播放失败', 'error');
             });
             
-            // 重置点赞状态
             likeBtn.classList.remove('active');
             likeIcon.src = iconUrls.heart;
-            
-            // 更新声音图标
             updateSoundIcon();
-            
-            // 显示本地视频计数器
-            localVideoCounter.textContent = `第 ${currentLocalVideoIndex + 1}/${window.LOCAL_VIDEO_LIST.length} 个`;
-            localVideoCounter.style.display = 'block';
-            
-            // 显示当前视频编号
-            showNotification(`本地视频 ${currentLocalVideoIndex + 1}/${window.LOCAL_VIDEO_LIST.length}`, 'info');
-        }
-
-        function loadNextLocalVideo() {
-            // 循环播放
-            currentLocalVideoIndex = (currentLocalVideoIndex + 1) % window.LOCAL_VIDEO_LIST.length;
-            loadLocalVideo();
-        }
-
-        function loadPrevLocalVideo() {
-            // 循环播放
-            currentLocalVideoIndex = (currentLocalVideoIndex - 1 + window.LOCAL_VIDEO_LIST.length) % window.LOCAL_VIDEO_LIST.length;
-            loadLocalVideo();
         }
 
         function loadVideo() {
-            if (isLocalVideo) {
-                loadNextLocalVideo();
+            if (isLocalSource) {
+                loadLocalVideo();
             } else if (isCustomApi) {
                 loadCustomVideo();
             } else {
@@ -1059,8 +994,14 @@
             }
         }
         
-        /* ========== API切换功能 ========== */
+        /* ========== 模式切换功能 ========== */
         function toggleApiMode() {
+            // 如果当前是本地源模式，先退出
+            if (isLocalSource) {
+                toggleLocalSource();
+                return;
+            }
+            
             // 添加点击动画效果
             apiSwitchBtn.style.animation = 'switchPulse 0.3s';
             const switchIcon = apiSwitchBtn.querySelector('.switch-icon');
@@ -1083,6 +1024,7 @@
                 
                 showNotification('已切换到默认接口', 'success');
                 
+                // 重置分类
                 currentCategory = 'jk';
                 document.querySelectorAll('.category-btn').forEach(btn => {
                     btn.classList.remove('active');
@@ -1092,11 +1034,8 @@
             } else {
                 // 切换到自定义API
                 isCustomApi = true;
-                isLocalVideo = false;
-                localVideoBtn.classList.remove('active');
                 apiSwitchBtn.classList.add('active');
                 updateApiButtonState();
-                updateLocalButtonState();
                 
                 // 禁用分类选择器
                 categoryScroll.style.opacity = '0.5';
@@ -1107,53 +1046,51 @@
             }
         }
         
-        /* ========== 本地视频切换功能 ========== */
-        function toggleLocalVideoMode() {
+        function toggleLocalSource() {
             // 添加点击动画效果
-            localVideoBtn.style.animation = 'switchPulse 0.3s';
-            const localIcon = localVideoBtn.querySelector('.local-icon');
-            localIcon.style.animation = 'switchPulse 0.6s ease-out';
+            localSourceBtn.style.animation = 'switchPulse 0.3s';
+            const switchIcon = localSourceBtn.querySelector('.switch-icon');
+            switchIcon.style.animation = 'switchPulse 0.6s ease-out';
             
             setTimeout(() => {
-                localVideoBtn.style.animation = '';
-                localIcon.style.animation = '';
+                localSourceBtn.style.animation = '';
+                switchIcon.style.animation = '';
             }, 600);
             
-            if (isLocalVideo) {
-                // 切换回默认API
-                isLocalVideo = false;
-                localVideoBtn.classList.remove('active');
-                updateLocalButtonState();
+            if (isLocalSource) {
+                // 退出本地源模式
+                isLocalSource = false;
+                localSourceBtn.classList.remove('active');
+                updateLocalSourceButtonState();
                 
                 // 启用分类选择器
                 categoryScroll.style.opacity = '1';
                 categoryScroll.style.pointerEvents = 'auto';
                 
-                showNotification('已切换到默认接口', 'success');
+                showNotification('已退出本地源模式', 'success');
                 
-                currentCategory = 'jk';
-                document.querySelectorAll('.category-btn').forEach(btn => {
-                    btn.classList.remove('active');
-                });
-                document.querySelector(`[data-category="jk"]`).classList.add('active');
-                loadDefaultVideo();
-            } else {
-                // 切换到本地视频
-                isLocalVideo = true;
+                // 切换到默认API模式
                 isCustomApi = false;
                 apiSwitchBtn.classList.remove('active');
-                localVideoBtn.classList.add('active');
                 updateApiButtonState();
-                updateLocalButtonState();
+                
+                loadDefaultVideo();
+            } else {
+                // 进入本地源模式
+                isLocalSource = true;
+                localSourceBtn.classList.add('active');
+                updateLocalSourceButtonState();
                 
                 // 禁用分类选择器
                 categoryScroll.style.opacity = '0.5';
                 categoryScroll.style.pointerEvents = 'none';
                 
-                showNotification('已切换到本地视频源', 'success');
+                // 退出API模式
+                isCustomApi = false;
+                apiSwitchBtn.classList.remove('active');
+                updateApiButtonState();
                 
-                // 重置视频索引
-                currentLocalVideoIndex = 0;
+                showNotification('已切换到本地视频源', 'success');
                 loadLocalVideo();
             }
         }
@@ -1170,15 +1107,15 @@
             }
         }
         
-        function updateLocalButtonState() {
-            if (isLocalVideo) {
-                localVideoLabel.textContent = '本地';
-                localVideoLabel.style.color = '#fff';
-                localVideoLabel.style.background = 'rgba(155, 89, 182, 0.4)';
+        function updateLocalSourceButtonState() {
+            if (isLocalSource) {
+                localSourceLabel.textContent = '本地';
+                localSourceLabel.style.color = '#fff';
+                localSourceLabel.style.background = 'rgba(76, 175, 80, 0.4)';
             } else {
-                localVideoLabel.textContent = '本地';
-                localVideoLabel.style.color = 'rgba(255, 255, 255, 0.7)';
-                localVideoLabel.style.background = 'rgba(0, 0, 0, 0.3)';
+                localSourceLabel.textContent = '本地';
+                localSourceLabel.style.color = 'rgba(255, 255, 255, 0.7)';
+                localSourceLabel.style.background = 'rgba(0, 0, 0, 0.3)';
             }
         }
         
@@ -1257,7 +1194,7 @@
         
         /* ========== 分类切换功能 ========== */
         function switchCategory(category) {
-            if (isCustomApi || isLocalVideo) {
+            if (isLocalSource || isCustomApi) {
                 showNotification('当前模式不支持分类切换', 'error');
                 return;
             }
@@ -1285,6 +1222,22 @@
             }
         }
         
+        /* ========== 本地视频源加载 ========== */
+        function loadLocalVideoSources() {
+            // 创建script标签加载video-sources.js
+            const script = document.createElement('script');
+            script.src = 'video-sources.js?v=' + Date.now();
+            script.onload = function() {
+                console.log('本地视频源加载成功，共', window.VIDEO_SOURCES ? window.VIDEO_SOURCES.length : 0, '个视频');
+                showNotification('本地视频源加载完成', 'success');
+            };
+            script.onerror = function() {
+                console.error('本地视频源加载失败');
+                showNotification('本地视频源加载失败，请检查video-sources.js文件', 'error');
+            };
+            document.head.appendChild(script);
+        }
+        
         /* ========== 通知功能 ========== */
         function showNotification(message, type = 'info') {
             const notification = document.createElement('div');
@@ -1301,8 +1254,6 @@
                 notification.style.background = 'rgba(52, 152, 219, 0.8)';
             } else if (type === 'error') {
                 notification.style.background = 'rgba(255, 107, 107, 0.8)';
-            } else if (type === 'info') {
-                notification.style.background = 'rgba(155, 89, 182, 0.8)';
             } else {
                 notification.style.background = 'rgba(0, 0, 0, 0.7)';
             }
@@ -1364,34 +1315,24 @@
             loadVideo();
         });
 
-        // 添加上一个视频按钮功能（通过双击视频左侧区域）
+        // 全屏按钮
+        fullscreenBtn.addEventListener('click', toggleFullscreen);
+
+        // 双击点赞
         videoElement.addEventListener('dblclick', function(event) {
-            const videoWidth = this.clientWidth;
-            const clickX = event.clientX - this.getBoundingClientRect().left;
+            likeBtn.click();
+            const effect = document.createElement('img');
+            effect.className = 'heart-effect';
+            effect.src = iconUrls.heartSolid;
+            effect.style.width = '60px';
+            effect.style.height = '60px';
+            effect.style.top = `${event.clientY}px`;
+            effect.style.left = `${event.clientX}px`;
             
-            // 如果双击左侧1/3区域，播放上一个本地视频
-            if (isLocalVideo && clickX < videoWidth / 3) {
-                loadPrevLocalVideo();
-                event.preventDefault();
-                return;
-            }
-            
-            // 如果双击右侧2/3区域，点赞
-            if (clickX > videoWidth / 3) {
-                likeBtn.click();
-                const effect = document.createElement('img');
-                effect.className = 'heart-effect';
-                effect.src = iconUrls.heartSolid;
-                effect.style.width = '60px';
-                effect.style.height = '60px';
-                effect.style.top = `${event.clientY}px`;
-                effect.style.left = `${event.clientX}px`;
-                
-                document.body.appendChild(effect);
-                setTimeout(() => {
-                    document.body.removeChild(effect);
-                }, 1000);
-            }
+            document.body.appendChild(effect);
+            setTimeout(() => {
+                document.body.removeChild(effect);
+            }, 1000);
         });
 
         // 加载状态处理
@@ -1407,18 +1348,8 @@
             loadingSpinner.style.display = 'none';
         });
         
-        videoElement.addEventListener('error', (e) => {
-            console.error('视频加载错误:', e);
+        videoElement.addEventListener('error', () => {
             loadingSpinner.style.display = 'none';
-            
-            if (isLocalVideo) {
-                showNotification(`本地视频 ${currentLocalVideoIndex + 1} 加载失败，尝试下一个`, 'error');
-                setTimeout(() => {
-                    loadNextLocalVideo();
-                }, 1000);
-            } else {
-                showNotification('视频加载失败，请重试', 'error');
-            }
         });
         
         // 分类按钮点击
@@ -1434,8 +1365,8 @@
         // API切换按钮
         apiSwitchBtn.addEventListener('click', toggleApiMode);
         
-        // 本地视频按钮
-        localVideoBtn.addEventListener('click', toggleLocalVideoMode);
+        // 本地源按钮
+        localSourceBtn.addEventListener('click', toggleLocalSource);
         
         // 键盘快捷键
         document.addEventListener('keydown', function(e) {
@@ -1445,27 +1376,15 @@
             }
             if (e.altKey && e.key === 'l') {
                 e.preventDefault();
-                toggleLocalVideoMode();
+                toggleLocalSource();
             }
             if (e.altKey && e.key === 'n') {
                 e.preventDefault();
                 loadVideo();
             }
-            if (e.altKey && e.key === 'p' && isLocalVideo) {
-                e.preventDefault();
-                loadPrevLocalVideo();
-            }
             if (e.altKey && e.key === 'f') {
                 e.preventDefault();
                 toggleFullscreen();
-            }
-            if (e.key === 'ArrowLeft' && isLocalVideo) {
-                e.preventDefault();
-                loadPrevLocalVideo();
-            }
-            if (e.key === 'ArrowRight' && isLocalVideo) {
-                e.preventDefault();
-                loadNextLocalVideo();
             }
             if (e.key === 'Escape' && isFullscreen) {
                 toggleFullscreen();
@@ -1474,7 +1393,7 @@
         
         // 初始化按钮状态
         updateApiButtonState();
-        updateLocalButtonState();
+        updateLocalSourceButtonState();
 
         /* ========== 改进的触摸交互 ========== */
         const videoContainer = document.querySelector('.video-player-container');
@@ -1588,13 +1507,12 @@
             fullscreenBtn.style.pointerEvents = 'auto';
         }
         
-        // 检查本地视频源是否加载成功
+        // 页面加载完成提示
         window.addEventListener('load', function() {
-            if (window.LOCAL_VIDEO_LIST) {
-                console.log(`本地视频源加载成功，共 ${window.LOCAL_VIDEO_LIST.length} 个视频`);
-            } else {
-                console.error('本地视频源加载失败，请检查 local-videos.js 文件');
-            }
+            console.log('页面加载完成');
+            setTimeout(() => {
+                showNotification('欢迎使用Echo小姐姐视频播放器', 'info');
+            }, 1000);
         });
     </script>
 </body>
